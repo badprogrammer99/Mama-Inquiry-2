@@ -13,30 +13,24 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Questionnaire {
 
     @Id
-    @Getter
-    @Setter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "questionnaire_id")
     private Long id;
 
-    @Getter
-    @Setter
     @Column(nullable = false)
     private String name;
 
-    @Getter
-    @Setter
     @ManyToOne
     @JoinColumn(name = "inquiry_id")
     private Inquiry inquiry;
 
-    @Getter
-    @Setter
     @OneToMany(mappedBy = "questionnaire", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Question> questions;
 }

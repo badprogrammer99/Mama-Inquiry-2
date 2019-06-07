@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import lombok.*;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Data
 public class QuestionnaireDTO implements Serializable {
@@ -13,8 +12,8 @@ public class QuestionnaireDTO implements Serializable {
     @Setter(AccessLevel.NONE)
     private final static long serialVersionUID = 7717368858436448393L;
 
-    private int id;
+    private Long id;
     private String name;
-    private List<QuestionDTO> questions;
 
+    private List<QuestionDTO> questions;
 }

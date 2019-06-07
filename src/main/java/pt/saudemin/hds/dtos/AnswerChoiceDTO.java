@@ -6,17 +6,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
-public class InquiryDTO implements Serializable {
+public class AnswerChoiceDTO implements Serializable {
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-    private final static long serialVersionUID = -8491396553123491185L;
+    private static final long serialVersionUID = 4302458742901058510L;
 
     private Long id;
     private String name;
-
-    private List<QuestionnaireDTO> questionnaires;
 }

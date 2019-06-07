@@ -5,11 +5,11 @@ import com.itextpdf.text.Document;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import pt.saudemin.hds.dtos.InquiryDTO;
+import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.mappers.InquiryMapper;
 import pt.saudemin.hds.repositories.InquiryRepository;
 import pt.saudemin.hds.services.InquiryService;
@@ -21,32 +21,30 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InquiryServiceImpl implements InquiryService {
 
-    private InquiryMapper inquiryMapper = Mappers.getMapper(InquiryMapper.class);
-
     @Autowired
     private InquiryRepository inquiryRepository;
 
     @Override
     public List<InquiryDTO> getAll() {
-        return inquiryRepository.findAll().stream().map(inquiryMapper::inquiryToInquiryDTO).collect(Collectors.toList());
+        return inquiryRepository.findAll().stream().map(InquiryMapper.INSTANCE::inquiryToInquiryDTO).collect(Collectors.toList());
     }
 
     @Override
     public InquiryDTO getById(long id) {
         var inquiry = inquiryRepository.findById(id);
 
-        return inquiry.map(inquiryMapper::inquiryToInquiryDTO).orElse(null);
+        return inquiry.map(InquiryMapper.INSTANCE::inquiryToInquiryDTO).orElse(null);
     }
 
     @Override
     public InquiryDTO create(InquiryDTO inquiryDTO) {
-        var inquiry = inquiryMapper.inquiryDTOToInquiry(inquiryDTO);
+        var inquiry = InquiryMapper.INSTANCE.inquiryDTOToInquiry(inquiryDTO);
         InquiryDTO createdInquiry = null;
 
         try {
-            createdInquiry = inquiryMapper.inquiryToInquiryDTO(inquiryRepository.save(inquiry));
+            createdInquiry = InquiryMapper.INSTANCE.inquiryToInquiryDTO(inquiryRepository.save(inquiry));
         } catch (Exception e) {
-            log.error("Error creating object of type " + this.getClass().getSimpleName() + ". Exception details: " + e.getMessage());
+            log.error("Error creating object of type " + Inquiry.class.getSimpleName() + ". Exception details: " + e.getMessage());
         }
 
         return createdInquiry;
@@ -57,7 +55,7 @@ public class InquiryServiceImpl implements InquiryService {
         try {
             inquiryRepository.deleteById(id);
         } catch (Exception e) {
-            log.error("Error deleting object of type " + this.getClass().getSimpleName() + ". Exception details: " + e.getMessage());
+            log.error("Error deleting object of type " + Inquiry.class.getSimpleName() + ". Exception details: " + e.getMessage());
             return false;
         }
 
