@@ -5,7 +5,11 @@ import java.util.List;
 
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
+
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuestionnaireDTO implements Serializable {
 
     @Getter(AccessLevel.NONE)
@@ -13,6 +17,8 @@ public class QuestionnaireDTO implements Serializable {
     private final static long serialVersionUID = 7717368858436448393L;
 
     private Long id;
+
+    @NotBlank(message = "A name is required!")
     private String name;
 
     private List<QuestionDTO> questions;

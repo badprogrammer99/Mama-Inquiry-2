@@ -1,8 +1,6 @@
-package pt.saudemin.hds.dtos;
+package pt.saudemin.hds.dtos.login;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -11,6 +9,8 @@ import java.io.Serializable;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginDTO implements Serializable {
 
     @Getter(AccessLevel.NONE)

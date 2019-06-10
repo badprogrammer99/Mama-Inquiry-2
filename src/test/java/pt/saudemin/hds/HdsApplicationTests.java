@@ -2,15 +2,21 @@ package pt.saudemin.hds;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.runners.Suite;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+import pt.saudemin.hds.services.InquiryServiceImplTest;
+import pt.saudemin.hds.services.QuestionnaireServiceImplTest;
+import pt.saudemin.hds.services.UserServiceImplTest;
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    UserServiceImplTest.class,
+    InquiryServiceImplTest.class,
+    QuestionnaireServiceImplTest.class
+})
 public class HdsApplicationTests {
 
     @Test
     public void contextLoads() {
     }
-
 }

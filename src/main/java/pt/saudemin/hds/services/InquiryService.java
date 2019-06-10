@@ -9,6 +9,7 @@ public interface InquiryService {
     List<InquiryDTO> getAll();
     InquiryDTO getById(long id);
     InquiryDTO create(InquiryDTO inquiryDTO);
+    InquiryDTO update(InquiryDTO inquiryDTO);
     Boolean delete(long id);
     Document generatePdf(long id);
 }

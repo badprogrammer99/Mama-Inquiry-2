@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 
 import org.mapstruct.factory.Mappers;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,15 +42,20 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
     @Override
     public QuestionnaireDTO create(QuestionnaireDTO questionnaireDTO) {
         var questionnaire = QuestionnaireMapper.INSTANCE.questionnaireDTOToQuestionnaire(questionnaireDTO);
-        QuestionnaireDTO createdQuestionnaire = null;
 
-        try {
-            createdQuestionnaire = QuestionnaireMapper.INSTANCE.questionnaireToQuestionnaireDTO(questionnaireRepository.save(questionnaire));
-        } catch (Exception e) {
-            log.error("Error creating object of type " + Questionnaire.class.getSimpleName() + ". Exception details: " + e.getMessage());
-        }
+        return QuestionnaireMapper.INSTANCE.questionnaireToQuestionnaireDTO(questionnaireRepository.save(questionnaire));
+    }
 
-        return createdQuestionnaire;
+    @Override
+    public QuestionnaireDTO update(QuestionnaireDTO questionnaireDTO) {
+        if (questionnaireDTO.getId() == null) return null;
+
+        var questionnaireById = questionnaireRepository.findById(questionnaireDTO.getId());
+
+        if (!questionnaireById.isPresent()) return null;
+
+        var questionnaire = QuestionnaireMapper.INSTANCE.questionnaireDTOToQuestionnaire(questionnaireDTO);
+        return QuestionnaireMapper.INSTANCE.questionnaireToQuestionnaireDTO(questionnaireRepository.save(questionnaire));
     }
 
     @Override

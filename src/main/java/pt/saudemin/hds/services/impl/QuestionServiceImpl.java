@@ -13,7 +13,6 @@ import pt.saudemin.hds.entities.ChoiceQuestion;
 import pt.saudemin.hds.entities.base.Question;
 import pt.saudemin.hds.mappers.ChoiceQuestionMapper;
 import pt.saudemin.hds.mappers.QuestionMapper;
-import pt.saudemin.hds.repositories.ChoiceQuestionRepository;
 import pt.saudemin.hds.repositories.QuestionRepository;
 import pt.saudemin.hds.services.QuestionService;
 import pt.saudemin.hds.utils.QuestionUtils;
@@ -26,16 +25,17 @@ import java.util.stream.Collectors;
 public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
-    private QuestionRepository questionRepository;
+    private QuestionRepository<Question> questionRepository;
 
     @Autowired
-    private ChoiceQuestionRepository choiceQuestionRepository;
+    private QuestionRepository<ChoiceQuestion> choiceQuestionRepository;
 
     @Override
     public List<? extends QuestionDTO> getAll() {
         return questionRepository.findAll()
                 .stream()
-                .map(question -> question instanceof ChoiceQuestion ? ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO((ChoiceQuestion) question) :
+                .map(question -> question instanceof ChoiceQuestion ?
+                        ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO((ChoiceQuestion) question) :
                         QuestionMapper.INSTANCE.questionToQuestionDTO(question))
                 .collect(Collectors.toList());
     }
@@ -58,7 +58,9 @@ public class QuestionServiceImpl implements QuestionService {
     public QuestionDTO getById(long id) {
         var question = questionRepository.findById(id);
 
-        return question.map(QuestionMapper.INSTANCE::questionToQuestionDTO).orElse(null);
+        return question.map(q -> q instanceof ChoiceQuestion ?
+                ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO((ChoiceQuestion) q) :
+                QuestionMapper.INSTANCE.questionToQuestionDTO(q)).orElse(null);
     }
 
     @Override
@@ -76,6 +78,16 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    public QuestionDTO update(QuestionDTO questionDTO) {
+        return QuestionMapper.INSTANCE.questionToQuestionDTO(updateQuestion(questionDTO));
+    }
+
+    @Override
+    public ChoiceQuestionDTO update(ChoiceQuestionDTO choiceQuestionDTO) {
+        return ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO(updateQuestion(choiceQuestionDTO));
+    }
+
+    @Override
     public Boolean delete(long id) {
         try {
             questionRepository.deleteById(id);
@@ -88,14 +100,21 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     private <T extends Question> T createQuestion(T question) {
-        T createdQuestion = null;
+        return questionRepository.save(question);
+    }
 
-        try {
-            createdQuestion = questionRepository.save(question);
-        } catch (Exception e) {
-            log.error("Error creating object of superclass type " + Question.class.getSimpleName() + ". Exception details: " + e.getMessage());
-        }
+    @SuppressWarnings("unchecked")
+    private <T extends Question> T updateQuestion(QuestionDTO questionDTO) {
+        if (questionDTO.getId() != null) return null;
 
-        return createdQuestion;
+        var questionById = questionRepository.findById(questionDTO.getId());
+
+        if (!questionById.isPresent()) return null;
+
+        var question = questionDTO instanceof ChoiceQuestionDTO ?
+                ChoiceQuestionMapper.INSTANCE.questionDTOToQuestion((ChoiceQuestionDTO) questionDTO) :
+                QuestionMapper.INSTANCE.questionDTOToQuestion(questionDTO);
+
+        return questionRepository.save((T) question);
     }
 }

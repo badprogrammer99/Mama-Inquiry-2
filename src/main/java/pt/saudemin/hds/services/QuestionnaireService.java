@@ -8,5 +8,6 @@ public interface QuestionnaireService {
     List<QuestionnaireDTO> getAll();
     QuestionnaireDTO getById(long id);
     QuestionnaireDTO create(QuestionnaireDTO questionnaireDTO);
+    QuestionnaireDTO update(QuestionnaireDTO questionnaireDTO);
     Boolean delete(long id);
 }

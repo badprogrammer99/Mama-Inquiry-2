@@ -12,5 +12,7 @@ public interface QuestionService {
     QuestionDTO getById(long id);
     QuestionDTO create(QuestionDTO questionDTO);
     ChoiceQuestionDTO create(ChoiceQuestionDTO choiceQuestionDTO);
+    QuestionDTO update(QuestionDTO questionDTO);
+    ChoiceQuestionDTO update(ChoiceQuestionDTO choiceQuestionDTO);
     Boolean delete(long id);
 }

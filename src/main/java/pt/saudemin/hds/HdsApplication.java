@@ -1,10 +1,15 @@
 package pt.saudemin.hds;
 
+import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import org.springframework.context.annotation.Bean;
 import pt.saudemin.hds.entities.*;
 
 import pt.saudemin.hds.entities.base.Question;
@@ -12,7 +17,7 @@ import pt.saudemin.hds.repositories.*;
 
 import java.util.HashSet;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class HdsApplication implements CommandLineRunner {
 
     @Autowired
@@ -39,20 +44,23 @@ public class HdsApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (RUN_SEED) {
+            var encoderInstance = new BCryptPasswordEncoder();
+            var encodedPassword = encoderInstance.encode("123456");
+
             Inquiry inquiry1 = new Inquiry(null, "Inquérito da Mamã", null, null);
             Inquiry inquiry2 = new Inquiry(null, "Inquérito de Oncologia", null, null);
 
             inquiryRepository.save(inquiry1);
             inquiryRepository.save(inquiry2);
 
-            User user = new User(null, 170100231, "Bruno Silva", "123456", false, new HashSet<>());
+            User user = new User(null, 170100231, "Bruno Silva", encodedPassword, false, new HashSet<>());
 
             user.getInquiries().add(inquiry1);
             user.getInquiries().add(inquiry2);
 
-            userRepository.save(new User(null, 170100228, "José Simões", "123456", true, null));
-            userRepository.save(new User(null, 170100229, "Ricardo Silva", "123456", true, null));
-            userRepository.save(new User(null, 170100230, "Tiago Fereira", "123456", true, null));
+            userRepository.save(new User(null, 170100228, "José Simões", encodedPassword, true, null));
+            userRepository.save(new User(null, 170100229, "Ricardo Silva", encodedPassword, true, null));
+            userRepository.save(new User(null, 170100230, "Tiago Fereira", encodedPassword, true, null));
             userRepository.save(user);
 
             Questionnaire questionnaire1 = new Questionnaire(null, "Questionário da qualidade de serviço", inquiry1, null);
@@ -92,5 +100,11 @@ public class HdsApplication implements CommandLineRunner {
             questionRepository.save(question2);
             questionRepository.save(question3);
         }
+    }
+
+    @Bean
+    @Lazy
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

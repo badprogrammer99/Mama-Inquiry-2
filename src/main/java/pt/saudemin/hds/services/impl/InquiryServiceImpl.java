@@ -39,15 +39,20 @@ public class InquiryServiceImpl implements InquiryService {
     @Override
     public InquiryDTO create(InquiryDTO inquiryDTO) {
         var inquiry = InquiryMapper.INSTANCE.inquiryDTOToInquiry(inquiryDTO);
-        InquiryDTO createdInquiry = null;
 
-        try {
-            createdInquiry = InquiryMapper.INSTANCE.inquiryToInquiryDTO(inquiryRepository.save(inquiry));
-        } catch (Exception e) {
-            log.error("Error creating object of type " + Inquiry.class.getSimpleName() + ". Exception details: " + e.getMessage());
-        }
+        return InquiryMapper.INSTANCE.inquiryToInquiryDTO(inquiryRepository.save(inquiry));
+    }
 
-        return createdInquiry;
+    @Override
+    public InquiryDTO update(InquiryDTO inquiryDTO) {
+        if (inquiryDTO.getId() == null) return null;
+
+        var inquiryById = inquiryRepository.findById(inquiryDTO.getId());
+
+        if (!inquiryById.isPresent()) return null;
+
+        var inquiry = InquiryMapper.INSTANCE.inquiryDTOToInquiry(inquiryDTO);
+        return InquiryMapper.INSTANCE.inquiryToInquiryDTO(inquiryRepository.save(inquiry));
     }
 
     @Override

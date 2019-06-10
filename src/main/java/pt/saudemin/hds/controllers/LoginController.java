@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import pt.saudemin.hds.dtos.LoginDTO;
-import pt.saudemin.hds.dtos.LoginInfoDTO;
+import pt.saudemin.hds.dtos.login.LoginDTO;
+import pt.saudemin.hds.dtos.login.LoginInfoDTO;
 import pt.saudemin.hds.services.UserService;
 
 import javax.validation.Valid;

@@ -1,14 +1,13 @@
 package pt.saudemin.hds.dtos;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class InquiryDTO implements Serializable {
 
     @Getter(AccessLevel.NONE)
