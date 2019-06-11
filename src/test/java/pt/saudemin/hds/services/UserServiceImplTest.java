@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.InquiryDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.UserDTO;
@@ -51,12 +52,21 @@ public class UserServiceImplTest {
             new InquiryDTO(1L, null, null);
             new InquiryDTO(2L, null, null);
         }});
-        var createdUser = userService.create(userDTO);
 
+        var createdUser = userService.create(userDTO);
+        var getCreatedUser = userService.getByPersonalId(170100312);
+
+        Assert.assertNotNull(createdUser);
         Assert.assertEquals(userDTO.getPersonalId(), createdUser.getPersonalId());
         Assert.assertEquals(userDTO.getName(), createdUser.getName());
         Assert.assertEquals(userDTO.getIsAdmin(), createdUser.getIsAdmin());
         Assert.assertEquals(userDTO.getInquiries(), createdUser.getInquiries());
+
+        Assert.assertNotNull(getCreatedUser);
+        Assert.assertEquals(userDTO.getPersonalId(), getCreatedUser.getPersonalId());
+        Assert.assertEquals(userDTO.getName(), getCreatedUser.getName());
+        Assert.assertEquals(userDTO.getIsAdmin(), getCreatedUser.getIsAdmin());
+        Assert.assertEquals(userDTO.getInquiries(), getCreatedUser.getInquiries());
     }
 
     @Test
@@ -64,14 +74,21 @@ public class UserServiceImplTest {
         var userDTO = new UpdateUserDTO(null,  170100481, "Jajaers xd", false, new ArrayList<InquiryDTO>() {{
             new InquiryDTO(2L, null, null);
         }}, 170100231);
-        var updateUser = userService.update(userDTO);
-        var updatedUser = userService.getByPersonalId(170100481);
 
-        Assert.assertNotNull(updateUser);
-        Assert.assertEquals(updatedUser.getPersonalId(), userDTO.getPersonalId());
-        Assert.assertEquals(updatedUser.getName(), userDTO.getName());
-        Assert.assertEquals(updatedUser.getIsAdmin(), userDTO.getIsAdmin());
-        Assert.assertEquals(updatedUser.getInquiries(), userDTO.getInquiries());
+        var updatedUser = userService.update(userDTO);
+        var getUpdatedUser = userService.getByPersonalId(170100481);
+
+        Assert.assertNotNull(updatedUser);
+        Assert.assertEquals(userDTO.getPersonalId(), updatedUser.getPersonalId());
+        Assert.assertEquals(userDTO.getName(), updatedUser.getName());
+        Assert.assertEquals(userDTO.getIsAdmin(), updatedUser.getIsAdmin());
+        Assert.assertEquals(userDTO.getInquiries(), updatedUser.getInquiries());
+
+        Assert.assertNotNull(getUpdatedUser);
+        Assert.assertEquals(userDTO.getPersonalId(), getUpdatedUser.getPersonalId());
+        Assert.assertEquals(userDTO.getName(), getUpdatedUser.getName());
+        Assert.assertEquals(userDTO.getIsAdmin(), getUpdatedUser.getIsAdmin());
+        Assert.assertEquals(userDTO.getInquiries(), getUpdatedUser.getInquiries());
     }
 
     @Test
@@ -97,19 +114,24 @@ public class UserServiceImplTest {
     }
 
     @Test
+    public void testCheckDuplicateIds() {
+        var id = 2L;
+        var isDuplicate = userService.isIdDuplicate(id);
+
+        Assert.assertTrue(isDuplicate);
+    }
+
+    @Test
     public void testChangePassword() {
-        var personalId = 170100228;
+        var changePasswordDTO = new ChangePasswordDTO(170100228, "123456", "abcdef");
 
-        var oldPassword = "123456";
-        var newPassword = "abcdef";
-
-        var changedPassword = userService.setUserPassword(personalId, oldPassword, newPassword);
+        var changedPassword = userService.setUserPassword(changePasswordDTO);
         Assert.assertTrue(changedPassword);
 
-        var user = userRepository.findByPersonalId(personalId);
+        var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
         Assert.assertTrue(user.isPresent());
 
         var userWithChangedPassword = user.get().getPassword();
-        Assert.assertTrue(bCryptPasswordEncoder.matches(newPassword, userWithChangedPassword));
+        Assert.assertTrue(bCryptPasswordEncoder.matches(changePasswordDTO.getNewPassword(), userWithChangedPassword));
     }
 }

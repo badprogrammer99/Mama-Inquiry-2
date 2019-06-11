@@ -35,8 +35,13 @@ public class InquiryServiceImplTest {
     public void testCreateInquiry() {
         var inquiryDTO = new InquiryDTO(null, "Teste Inquérito", null);
         var createdInquiry = inquiryService.create(inquiryDTO);
+        var getCreatedInquiries = inquiryService.getById(createdInquiry.getId());
 
         Assert.assertNotNull(createdInquiry);
+        Assert.assertEquals(inquiryDTO.getName(), createdInquiry.getName());
+        Assert.assertEquals(inquiryDTO.getQuestionnaires(), createdInquiry.getQuestionnaires());
+
+        Assert.assertNotNull(getCreatedInquiries);
         Assert.assertEquals(inquiryDTO.getName(), createdInquiry.getName());
         Assert.assertEquals(inquiryDTO.getQuestionnaires(), createdInquiry.getQuestionnaires());
     }
@@ -45,12 +50,18 @@ public class InquiryServiceImplTest {
     public void testUpdateInquiry() {
         var inquiryDTO = new InquiryDTO(1L, "Teste Inquérito", null);
         var updateInquiry = inquiryService.update(inquiryDTO);
-        var updatedInquiry = inquiryService.getById(1L);
+        var getUpdatedInquiry = inquiryService.getById(1L);
 
         Assert.assertNotNull(updateInquiry);
-        Assert.assertEquals(inquiryDTO.getId(), updatedInquiry.getId());
-        Assert.assertEquals(inquiryDTO.getName(), updatedInquiry.getName());
-        Assert.assertEquals(inquiryDTO.getQuestionnaires(), inquiryDTO.getQuestionnaires());
+        Assert.assertEquals(inquiryDTO.getId(), updateInquiry.getId());
+        Assert.assertEquals(inquiryDTO.getName(), updateInquiry.getName());
+        Assert.assertEquals(inquiryDTO.getQuestionnaires(), updateInquiry.getQuestionnaires());
+
+        Assert.assertNotNull(getUpdatedInquiry);
+        Assert.assertEquals(inquiryDTO.getId(), getUpdatedInquiry.getId());
+        Assert.assertEquals(inquiryDTO.getName(), getUpdatedInquiry.getName());
+        Assert.assertEquals(inquiryDTO.getQuestionnaires(), getUpdatedInquiry.getQuestionnaires());
+
     }
 
     @Test

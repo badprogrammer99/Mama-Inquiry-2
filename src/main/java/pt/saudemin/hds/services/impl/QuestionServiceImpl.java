@@ -105,7 +105,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     @SuppressWarnings("unchecked")
     private <T extends Question> T updateQuestion(QuestionDTO questionDTO) {
-        if (questionDTO.getId() != null) return null;
+        if (questionDTO.getId() == null) return null;
 
         var questionById = questionRepository.findById(questionDTO.getId());
 

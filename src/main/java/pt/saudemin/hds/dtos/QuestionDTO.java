@@ -1,14 +1,13 @@
 package pt.saudemin.hds.dtos;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuestionDTO implements Serializable {
 
     @Getter(AccessLevel.NONE)

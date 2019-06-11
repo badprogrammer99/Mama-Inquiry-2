@@ -1,7 +1,6 @@
 package pt.saudemin.hds.dtos;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -10,7 +9,11 @@ import java.util.List;
 @NoArgsConstructor
 public class UpdateUserDTO extends UserDTO {
 
-    @NotNull(message = "The user past personal id is required!")
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private static final long serialVersionUID = -4205209896882953571L;
+
+    @NotNull(message = "The old personal id is required!")
     private Integer oldPersonalId;
 
     public UpdateUserDTO(Long id, Integer personalId, String name, Boolean isAdmin, List<InquiryDTO> inquiries, Integer oldPersonalId) {

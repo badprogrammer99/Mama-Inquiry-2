@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import pt.saudemin.hds.services.InquiryServiceImplTest;
+import pt.saudemin.hds.services.QuestionServiceImplTest;
 import pt.saudemin.hds.services.QuestionnaireServiceImplTest;
 import pt.saudemin.hds.services.UserServiceImplTest;
 
@@ -12,7 +13,8 @@ import pt.saudemin.hds.services.UserServiceImplTest;
 @Suite.SuiteClasses({
     UserServiceImplTest.class,
     InquiryServiceImplTest.class,
-    QuestionnaireServiceImplTest.class
+    QuestionnaireServiceImplTest.class,
+    QuestionServiceImplTest.class
 })
 public class HdsApplicationTests {
 

@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import pt.saudemin.hds.Constants;
+import pt.saudemin.hds.config.Constants;
 import pt.saudemin.hds.controllers.admin.base.BaseAdminController;
 import pt.saudemin.hds.dtos.ChoiceQuestionDTO;
 import pt.saudemin.hds.dtos.QuestionDTO;

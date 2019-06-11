@@ -1,4 +1,4 @@
-package pt.saudemin.hds;
+package pt.saudemin.hds.config;
 
 public class Constants {
     public static final String GET_GENERIC_QUESTION_PARAM = "generic";

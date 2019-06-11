@@ -42,7 +42,7 @@ public class AdminQuestionnaireController extends BaseAdminController {
     @PutMapping(value = "questionnaire")
     public ResponseEntity<Object> updateQuestionnaire(@RequestBody @Valid QuestionnaireDTO questionnaireDTO) {
         return Optional
-                .ofNullable(questionnaireService.create(questionnaireDTO))
+                .ofNullable(questionnaireService.update(questionnaireDTO))
                 .map(questionnaire -> new ResponseEntity<Object>(questionnaire, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>("Couldn't update the questionnaire, " +
                         "either you didn't supply an ID or the record associated to it doesn't exist. ", HttpStatus.BAD_REQUEST));

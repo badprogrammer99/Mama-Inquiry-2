@@ -33,22 +33,32 @@ public class QuestionnaireServiceImplTest {
     public void testCreateQuestionnaire() {
         var questionnaireDTO = new QuestionnaireDTO(null, "Questionário nhónhó", null);
         var createdQuestionnaire = questionnaireService.create(questionnaireDTO);
+        var getCreatedQuestionnaire = questionnaireService.getById(createdQuestionnaire.getId());
 
         Assert.assertNotNull(createdQuestionnaire);
         Assert.assertEquals(questionnaireDTO.getName(), createdQuestionnaire.getName());
         Assert.assertEquals(questionnaireDTO.getQuestions(), createdQuestionnaire.getQuestions());
+
+        Assert.assertNotNull(getCreatedQuestionnaire);
+        Assert.assertEquals(questionnaireDTO.getName(), getCreatedQuestionnaire.getName());
+        Assert.assertEquals(questionnaireDTO.getQuestions(), getCreatedQuestionnaire.getQuestions());
     }
 
     @Test
     public void testUpdateQuestionnaire() {
         var questionnaireDTO = new QuestionnaireDTO(1L, "Questionário nhónhó", null);
-        var createQuestionnaire = questionnaireService.update(questionnaireDTO);
-        var createdQuestionnaire = questionnaireService.getById(1L);
+        var updateQuestionnaire = questionnaireService.update(questionnaireDTO);
+        var getUpdatedQuestionnaire = questionnaireService.getById(1L);
 
-        Assert.assertNotNull(createQuestionnaire);
-        Assert.assertEquals(questionnaireDTO.getId(), createdQuestionnaire.getId());
-        Assert.assertEquals(questionnaireDTO.getName(), createdQuestionnaire.getName());
-        Assert.assertEquals(questionnaireDTO.getQuestions(), createdQuestionnaire.getQuestions());
+        Assert.assertNotNull(updateQuestionnaire);
+        Assert.assertEquals(questionnaireDTO.getId(), updateQuestionnaire.getId());
+        Assert.assertEquals(questionnaireDTO.getName(), updateQuestionnaire.getName());
+        Assert.assertEquals(questionnaireDTO.getQuestions(), updateQuestionnaire.getQuestions());
+
+        Assert.assertNotNull(getUpdatedQuestionnaire);
+        Assert.assertEquals(questionnaireDTO.getId(), getUpdatedQuestionnaire.getId());
+        Assert.assertEquals(questionnaireDTO.getName(), getUpdatedQuestionnaire.getName());
+        Assert.assertEquals(questionnaireDTO.getQuestions(), getUpdatedQuestionnaire.getQuestions());
     }
 
     @Test

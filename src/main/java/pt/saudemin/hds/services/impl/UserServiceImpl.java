@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
@@ -99,16 +100,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean checkForDuplicateIds(long id) {
-        return (!userRepository.findById(id).isPresent());
+    public Boolean isIdDuplicate(long id) {
+        return (userRepository.findById(id).isPresent());
     }
 
     @Override
-    public Boolean setUserPassword(int personalId, String oldPassword, String newPassword) {
-        var user = userRepository.findByPersonalId(personalId);
+    public Boolean setUserPassword(ChangePasswordDTO changePasswordDTO) {
+        var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
 
-        if (user.isPresent() && bCryptPasswordEncoder.matches(oldPassword, user.get().getPassword())) {
-            user.get().setPassword(bCryptPasswordEncoder.encode(newPassword));
+        if (user.isPresent() && bCryptPasswordEncoder.matches(changePasswordDTO.getOldPassword(), user.get().getPassword())) {
+            user.get().setPassword(bCryptPasswordEncoder.encode(changePasswordDTO.getNewPassword()));
             userRepository.save(user.get());
             return true;
         }

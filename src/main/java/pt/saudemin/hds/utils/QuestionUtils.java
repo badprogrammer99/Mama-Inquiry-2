@@ -12,7 +12,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class QuestionUtils {
-
     public static List<QuestionDTO> filterListOfQuestionsOnPredicate(List<Question> questions, Predicate<? super Question> predicate) {
         return questions.stream()
                 .filter(predicate)

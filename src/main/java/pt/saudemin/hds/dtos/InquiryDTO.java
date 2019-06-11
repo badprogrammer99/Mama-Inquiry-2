@@ -2,6 +2,7 @@ package pt.saudemin.hds.dtos;
 
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.List;
 
@@ -15,6 +16,8 @@ public class InquiryDTO implements Serializable {
     private final static long serialVersionUID = -8491396553123491185L;
 
     private Long id;
+
+    @NotBlank(message = "A inquiry name is required!")
     private String name;
 
     private List<QuestionnaireDTO> questionnaires;

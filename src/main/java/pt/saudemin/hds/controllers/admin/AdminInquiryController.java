@@ -9,6 +9,7 @@ import pt.saudemin.hds.controllers.admin.base.BaseAdminController;
 import pt.saudemin.hds.dtos.InquiryDTO;
 import pt.saudemin.hds.services.InquiryService;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
@@ -31,11 +32,20 @@ public class AdminInquiryController extends BaseAdminController {
     }
 
     @PostMapping(value = "inquiry")
-    public ResponseEntity<Object> createInquiry(@RequestBody InquiryDTO inquiryDTO) {
+    public ResponseEntity<Object> createInquiry(@RequestBody @Valid InquiryDTO inquiryDTO) {
         return Optional
                 .ofNullable(inquiryService.create(inquiryDTO))
                 .map(inquiry -> new ResponseEntity<Object>(inquiry, HttpStatus.OK))
                 .get();
+    }
+
+    @PutMapping(value = "inquiry")
+    public ResponseEntity<Object> updateInquiry(@RequestBody @Valid InquiryDTO inquiryDTO) {
+        return Optional
+                .ofNullable(inquiryService.update(inquiryDTO))
+                .map(inquiry -> new ResponseEntity<Object>(inquiry, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>("Couldn't update the inquiry, " +
+                        "either you didn't supply an ID or the record associated to it doesn't exist. ", HttpStatus.BAD_REQUEST));
     }
 
     @DeleteMapping(value = "inquiry")
