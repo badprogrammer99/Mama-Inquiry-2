@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import pt.saudemin.hds.config.Constants;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
 import pt.saudemin.hds.services.UserService;
@@ -19,7 +20,7 @@ public class LoginController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "login")
+    @PostMapping(value = Constants.LOGIN_PATH)
     public ResponseEntity<LoginInfoDTO> doLogin(@RequestBody @Valid LoginDTO loginDTO) {
         return Optional
                 .ofNullable(userService.authenticateUser(loginDTO))

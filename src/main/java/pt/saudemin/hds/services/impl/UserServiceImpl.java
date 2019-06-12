@@ -19,6 +19,7 @@ import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
 import pt.saudemin.hds.mappers.UserMapper;
 import pt.saudemin.hds.repositories.UserRepository;
 import pt.saudemin.hds.services.UserService;
+import pt.saudemin.hds.utils.TokenUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,7 +94,7 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.findByPersonalId(loginDTO.getPersonalId());
 
         if (user.isPresent() && bCryptPasswordEncoder.matches(loginDTO.getPassword(), user.get().getPassword())) {
-            return new LoginInfoDTO(null, user.get().getPersonalId(), user.get().getIsAdmin());
+            return new LoginInfoDTO(TokenUtils.generateToken(user.get()), user.get().getPersonalId(), user.get().getIsAdmin());
         }
 
         return null;
