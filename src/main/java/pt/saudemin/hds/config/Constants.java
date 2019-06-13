@@ -1,7 +1,7 @@
 package pt.saudemin.hds.config;
 
 public class Constants {
-    public static final String SECRET = "Eprj0smsAvtI89NrMRnetFVsMMVZJLf7";
+    public static final String SECRET = "VmYq3t6w9z$C&F)J@NcQfTjWnZr4u7x!A%D*G-KaPdSgUkXp2s5v8y/B?E(H+MbQ";
     public static final long EXPIRATION_TIME = 86_400_000;
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";

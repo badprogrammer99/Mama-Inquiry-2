@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import pt.saudemin.hds.config.Constants;
 import pt.saudemin.hds.controllers.admin.base.BaseAdminController;
-import pt.saudemin.hds.dtos.ChoiceQuestionDTO;
-import pt.saudemin.hds.dtos.QuestionDTO;
+import pt.saudemin.hds.dtos.entities.ChoiceQuestionDTO;
+import pt.saudemin.hds.dtos.entities.QuestionDTO;
 import pt.saudemin.hds.services.QuestionService;
 
 import javax.validation.Valid;

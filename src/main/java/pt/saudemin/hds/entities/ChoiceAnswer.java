@@ -1,6 +1,7 @@
 package pt.saudemin.hds.entities;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import javax.persistence.ManyToOne;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = false)
 public class ChoiceAnswer extends Answer {
 
     @Getter(AccessLevel.NONE)

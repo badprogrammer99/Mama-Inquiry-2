@@ -10,9 +10,10 @@ import org.springframework.stereotype.Service;
 
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
+import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
-import pt.saudemin.hds.dtos.UserDTO;
+import pt.saudemin.hds.dtos.entities.UserDTO;
 import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.entities.base.Answer;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
@@ -119,12 +120,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean sendEmailWithUserDetails(long id) {
+    public Boolean setUserAnswersToQuestionnaire(List<AnswerDTO> answers) {
         throw new UnsupportedOperationException("Operation not supported yet.");
     }
 
     @Override
-    public Boolean setUserAnswersToQuestionnaire(List<Answer> answers) {
+    public Boolean sendEmailWithUserDetails(long id) {
         throw new UnsupportedOperationException("Operation not supported yet.");
     }
 }

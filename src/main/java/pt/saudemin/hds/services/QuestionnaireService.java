@@ -1,6 +1,6 @@
 package pt.saudemin.hds.services;
 
-import pt.saudemin.hds.dtos.QuestionnaireDTO;
+import pt.saudemin.hds.dtos.entities.QuestionnaireDTO;
 
 import java.util.List;
 

@@ -3,12 +3,10 @@ package pt.saudemin.hds.services.impl;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 
-import org.mapstruct.factory.Mappers;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import pt.saudemin.hds.dtos.QuestionnaireDTO;
+import pt.saudemin.hds.dtos.entities.QuestionnaireDTO;
 import pt.saudemin.hds.entities.Questionnaire;
 import pt.saudemin.hds.mappers.QuestionnaireMapper;
 import pt.saudemin.hds.repositories.QuestionnaireRepository;

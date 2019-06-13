@@ -1,4 +1,4 @@
-package pt.saudemin.hds.dtos;
+package pt.saudemin.hds.dtos.entities;
 
 import java.io.Serializable;
 import java.util.List;

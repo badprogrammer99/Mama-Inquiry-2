@@ -12,9 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
-import pt.saudemin.hds.dtos.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.InquiryDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
-import pt.saudemin.hds.dtos.UserDTO;
+import pt.saudemin.hds.dtos.entities.UserDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.repositories.UserRepository;
 

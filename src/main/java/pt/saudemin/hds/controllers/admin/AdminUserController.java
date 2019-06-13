@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import pt.saudemin.hds.controllers.admin.base.BaseAdminController;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
-import pt.saudemin.hds.dtos.UserDTO;
+import pt.saudemin.hds.dtos.entities.UserDTO;
 
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
 import pt.saudemin.hds.services.UserService;

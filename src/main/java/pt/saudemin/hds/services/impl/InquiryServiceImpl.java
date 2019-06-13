@@ -8,7 +8,7 @@ import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import pt.saudemin.hds.dtos.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.InquiryDTO;
 import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.mappers.InquiryMapper;
 import pt.saudemin.hds.repositories.InquiryRepository;

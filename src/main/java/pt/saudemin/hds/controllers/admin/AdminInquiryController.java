@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import pt.saudemin.hds.controllers.admin.base.BaseAdminController;
-import pt.saudemin.hds.dtos.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.InquiryDTO;
 import pt.saudemin.hds.services.InquiryService;
 
 import javax.validation.Valid;

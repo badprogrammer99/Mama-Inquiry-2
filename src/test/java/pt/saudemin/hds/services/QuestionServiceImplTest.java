@@ -7,13 +7,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import pt.saudemin.hds.dtos.ChoiceQuestionDTO;
-import pt.saudemin.hds.dtos.QuestionDTO;
-import pt.saudemin.hds.entities.ChoiceQuestion;
-import pt.saudemin.hds.entities.base.Question;
+import pt.saudemin.hds.dtos.entities.ChoiceQuestionDTO;
+import pt.saudemin.hds.dtos.entities.QuestionDTO;
 
 import javax.transaction.Transactional;
-import java.awt.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

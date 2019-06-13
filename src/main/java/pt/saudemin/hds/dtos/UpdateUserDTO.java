@@ -1,11 +1,14 @@
 package pt.saudemin.hds.dtos;
 
 import lombok.*;
+import pt.saudemin.hds.dtos.entities.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.UserDTO;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class UpdateUserDTO extends UserDTO {
 

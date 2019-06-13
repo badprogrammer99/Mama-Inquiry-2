@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import org.mapstruct.factory.Mappers;
-import pt.saudemin.hds.dtos.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.InquiryDTO;
 import pt.saudemin.hds.entities.Inquiry;
 
 @Mapper(uses = {UserMapper.class, QuestionnaireMapper.class})

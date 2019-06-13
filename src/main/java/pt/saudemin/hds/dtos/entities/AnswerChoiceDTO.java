@@ -1,13 +1,12 @@
-package pt.saudemin.hds.dtos;
+package pt.saudemin.hds.dtos.entities;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AnswerChoiceDTO implements Serializable {
 
     @Getter(AccessLevel.NONE)

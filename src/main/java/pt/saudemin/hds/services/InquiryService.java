@@ -1,7 +1,7 @@
 package pt.saudemin.hds.services;
 
 import com.itextpdf.text.Document;
-import pt.saudemin.hds.dtos.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.InquiryDTO;
 
 import java.util.List;
 

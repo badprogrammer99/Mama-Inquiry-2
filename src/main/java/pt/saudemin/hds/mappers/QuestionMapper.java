@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 
 import org.mapstruct.factory.Mappers;
 
-import pt.saudemin.hds.dtos.QuestionDTO;
+import pt.saudemin.hds.dtos.entities.QuestionDTO;
 import pt.saudemin.hds.entities.base.Question;
 
 @Mapper
