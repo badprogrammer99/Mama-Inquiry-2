@@ -15,20 +15,23 @@ import pt.saudemin.hds.mappers.ChoiceQuestionMapper;
 import pt.saudemin.hds.mappers.QuestionMapper;
 import pt.saudemin.hds.repositories.QuestionRepository;
 import pt.saudemin.hds.services.QuestionService;
-import pt.saudemin.hds.utils.QuestionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * TODO: Following methods are non optimized, try to find a better way:
+ * @see QuestionServiceImpl#getAll()
+ * @see QuestionServiceImpl#getAllGenericQuestions()
+ * @see QuestionServiceImpl#getAllChoiceQuestions()
+ * If database gets big enough, instance checks and casts will very quickly become expensive and possibly diminish the performance.
+ */
 @Service
 @Slf4j
 public class QuestionServiceImpl implements QuestionService {
 
     @Autowired
-    private QuestionRepository<Question> questionRepository;
-
-    @Autowired
-    private QuestionRepository<ChoiceQuestion> choiceQuestionRepository;
+    private QuestionRepository questionRepository;
 
     @Override
     public List<? extends QuestionDTO> getAll() {
@@ -42,16 +45,19 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionDTO> getAllGenericQuestions() {
-        var questions = questionRepository.findAll();
-
-        return QuestionUtils.filterListOfQuestionsOnPredicate(questions, question -> !(question instanceof ChoiceQuestion));
+        return questionRepository.findAll().stream()
+                .filter(question -> !(question instanceof ChoiceQuestion))
+                .map(QuestionMapper.INSTANCE::questionToQuestionDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ChoiceQuestionDTO> getAllChoiceQuestions() {
-        var choiceQuestions = choiceQuestionRepository.findAll();
-
-        return QuestionUtils.filterListOfChoiceQuestionsOnPredicate(choiceQuestions, ChoiceQuestion.class::isInstance);
+        return questionRepository.findAll().stream()
+                .filter(ChoiceQuestion.class::isInstance)
+                .map(question -> (ChoiceQuestion) question)
+                .map(ChoiceQuestionMapper.INSTANCE::questionToQuestionDTO)
+                .collect(Collectors.toList());
     }
 
     @Override

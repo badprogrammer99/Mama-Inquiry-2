@@ -53,11 +53,19 @@ public class AdminUserController extends BaseAdminController {
 
     @PutMapping(value = "user")
     public ResponseEntity<Object> updateUser(@RequestBody @Valid UpdateUserDTO updateUserDTO) {
-        return Optional
-                .ofNullable(userService.update(updateUserDTO))
-                .map(user -> new ResponseEntity<Object>(user, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>("Couldn't update the user, " +
-                        "either you didn't supply an ID or the record associated to it doesn't exist. ", HttpStatus.BAD_REQUEST));
+        ResponseEntity<Object> response;
+
+        try {
+            response = Optional
+                    .ofNullable(userService.update(updateUserDTO))
+                    .map(user -> new ResponseEntity<Object>(user, HttpStatus.OK))
+                    .orElseGet(() -> new ResponseEntity<>("Couldn't update the user, " +
+                            "either you didn't supply an ID or the record associated to it doesn't exist. ", HttpStatus.BAD_REQUEST));
+        } catch (AttachingInquiriesToAdminException e) {
+            return new ResponseEntity<>("Admins can't have attached inquiries!", HttpStatus.BAD_REQUEST);
+        }
+
+        return response;
     }
 
     @DeleteMapping(value = "user")

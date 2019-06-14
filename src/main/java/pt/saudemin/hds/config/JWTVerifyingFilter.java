@@ -10,6 +10,8 @@ import io.jsonwebtoken.Jwts;
 
 import org.apache.shiro.web.filter.authz.RolesAuthorizationFilter;
 
+import java.util.Arrays;
+
 public class JWTVerifyingFilter extends RolesAuthorizationFilter {
 
     @Override
@@ -32,9 +34,9 @@ public class JWTVerifyingFilter extends RolesAuthorizationFilter {
                 .getBody();
 
         String claim = claims.get("role").toString();
-        String[] requiredRole = (String[]) mappedValue;
+        String[] requiredRoles = (String[]) mappedValue;
 
-        return claim.equals(requiredRole[0]);
+       return Arrays.asList(requiredRoles).contains(claim);
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class AnswerId implements Serializable {
 

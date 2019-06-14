@@ -1,11 +1,9 @@
 package pt.saudemin.hds.entities;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import pt.saudemin.hds.entities.base.Answer;
+import pt.saudemin.hds.entities.base.AnswerId;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,13 +11,15 @@ import javax.persistence.Entity;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class FreeAnswer extends Answer {
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = 6509025077028473497L;
-
-    @Column(nullable = false)
+    @Column
     private String answer;
+
+    public FreeAnswer(AnswerId answerId, String observations, String answer) {
+        super(answerId, observations);
+        this.answer = answer;
+    }
 }

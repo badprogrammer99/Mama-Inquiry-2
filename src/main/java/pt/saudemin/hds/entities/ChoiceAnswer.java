@@ -1,27 +1,29 @@
 package pt.saudemin.hds.entities;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import pt.saudemin.hds.entities.base.Answer;
+import pt.saudemin.hds.entities.base.AnswerId;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class ChoiceAnswer extends Answer {
 
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = 1067854538401314765L;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinColumns({
+        @JoinColumn(name = "question_id"),
+        @JoinColumn(name = "user_id")
+    })
+    private Set<AnswerChoice> answerChoices;
 
-    @ManyToOne
-    @JoinColumn(name = "answer_choice_id", nullable = false)
-    private AnswerChoice answerChoice;
+    public ChoiceAnswer(AnswerId answerId, String observations, Set<AnswerChoice> answerChoices) {
+        super(answerId, observations);
+        this.answerChoices = answerChoices;
+    }
 }

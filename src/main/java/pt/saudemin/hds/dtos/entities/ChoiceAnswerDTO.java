@@ -4,6 +4,9 @@ import lombok.*;
 
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 
+import javax.validation.constraints.NotBlank;
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
@@ -13,10 +16,11 @@ public class ChoiceAnswerDTO extends AnswerDTO {
     @Setter(AccessLevel.NONE)
     private static final long serialVersionUID = 5862738007419435140L;
 
-    private AnswerChoiceDTO answerChoice;
+    @NotBlank(message = "Chosen answers are required!")
+    private List<AnswerChoiceDTO> answerChoices;
 
-    public ChoiceAnswerDTO(AnswerIdDTO answerId, String observations, AnswerChoiceDTO answerChoiceDTO) {
+    public ChoiceAnswerDTO(AnswerIdDTO answerId, String observations, List<AnswerChoiceDTO> answerChoices) {
         super(answerId, observations);
-        this.answerChoice = answerChoiceDTO;
+        this.answerChoices = answerChoices;
     }
 }

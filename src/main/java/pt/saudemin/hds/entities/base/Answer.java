@@ -8,16 +8,13 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Answer {
-
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
-    private static final long serialVersionUID = 7133254567050645241L;
 
     @EmbeddedId
     private AnswerId answerId;
 
-    @Column(nullable = false)
+    @Column
     private String observations;
 }

@@ -12,15 +12,25 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
-import pt.saudemin.hds.dtos.entities.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.*;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
-import pt.saudemin.hds.dtos.entities.UserDTO;
+import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
+import pt.saudemin.hds.entities.base.Answer;
+import pt.saudemin.hds.entities.base.AnswerId;
+import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
+import pt.saudemin.hds.exceptions.GivenAnswersExceedQuestionPossibleAnswersException;
+import pt.saudemin.hds.mappers.AnswerChoiceMapper;
+import pt.saudemin.hds.mappers.QuestionMapper;
+import pt.saudemin.hds.mappers.UserMapper;
+import pt.saudemin.hds.repositories.AnswerChoiceRepository;
+import pt.saudemin.hds.repositories.AnswerRepository;
 import pt.saudemin.hds.repositories.UserRepository;
 
 import javax.transaction.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -28,10 +38,19 @@ import java.util.ArrayList;
 public class UserServiceImplTest {
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AnswerChoiceRepository answerChoiceRepository;
+
+    @Autowired
+    private AnswerRepository<Answer> answerRepository;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private QuestionService questionService;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -47,7 +66,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testCreateUser() {
+    public void testCreateUser() throws AttachingInquiriesToAdminException {
         var userDTO = new UserDTO(null, 170100312, "Jajaja xd", false, new ArrayList<InquiryDTO>() {{
             new InquiryDTO(1L, null, null);
             new InquiryDTO(2L, null, null);
@@ -70,7 +89,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testUpdateUser() {
+    public void testUpdateUser() throws AttachingInquiriesToAdminException {
         var userDTO = new UpdateUserDTO(null,  170100481, "Jajaers xd", false, new ArrayList<InquiryDTO>() {{
             new InquiryDTO(2L, null, null);
         }}, 170100231);
@@ -95,11 +114,8 @@ public class UserServiceImplTest {
     public void testDeleteUser() {
         var id = 170100228;
 
-        var isUserDeleted = userService.delete(id);
-        var user = userService.getByPersonalId(id);
-
-        Assert.assertTrue(isUserDeleted);
-        Assert.assertNull(user);
+        Assert.assertTrue(userService.delete(id));
+        Assert.assertNull(userService.getByPersonalId(id));
     }
 
     @Test
@@ -115,23 +131,46 @@ public class UserServiceImplTest {
 
     @Test
     public void testCheckDuplicateIds() {
-        var id = 2L;
-        var isDuplicate = userService.isIdDuplicate(id);
-
-        Assert.assertTrue(isDuplicate);
+        Assert.assertTrue(userService.isIdDuplicate(2L));
     }
 
     @Test
     public void testChangePassword() {
         var changePasswordDTO = new ChangePasswordDTO(170100228, "123456", "abcdef");
-
-        var changedPassword = userService.setUserPassword(changePasswordDTO);
-        Assert.assertTrue(changedPassword);
+        Assert.assertTrue(userService.setUserPassword(changePasswordDTO));
 
         var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
-        Assert.assertTrue(user.isPresent());
 
-        var userWithChangedPassword = user.get().getPassword();
-        Assert.assertTrue(bCryptPasswordEncoder.matches(changePasswordDTO.getNewPassword(), userWithChangedPassword));
+        Assert.assertTrue(user.isPresent());
+        Assert.assertTrue(bCryptPasswordEncoder.matches(changePasswordDTO.getNewPassword(), user.get().getPassword()));
+    }
+
+    @Test
+    public void testSetAnswers() throws GivenAnswersExceedQuestionPossibleAnswersException {
+        var genericQuestions = questionService.getAllGenericQuestions();
+        var choiceQuestions = questionService.getAllChoiceQuestions();
+
+        var userDTO = userService.getByPersonalId(170100231);
+        var user = UserMapper.INSTANCE.userDTOToUser(userDTO);
+
+        List<AnswerDTO> answers = new ArrayList<AnswerDTO>(){{
+            add(new FreeAnswerDTO(new AnswerIdDTO(genericQuestions.get(0), userDTO), null, "Atm XD"));
+            add(new FreeAnswerDTO(new AnswerIdDTO(genericQuestions.get(1), userDTO), null, "Atm XD"));
+            add(new ChoiceAnswerDTO(new AnswerIdDTO(choiceQuestions.get(0), userDTO), "Atm XD", new ArrayList<AnswerChoiceDTO>(){{
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(1L).get()));
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(2L).get()));
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(3L).get()));
+            }}));
+        }};
+
+        Assert.assertTrue(userService.setUserAnswersToQuestions(answers));
+
+        var firstAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(genericQuestions.get(0)), user));
+        var secondAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(genericQuestions.get(1)), user));
+        var thirdAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(choiceQuestions.get(0)), user));
+
+        Assert.assertTrue(firstAnswer.isPresent());
+        Assert.assertTrue(secondAnswer.isPresent());
+        Assert.assertTrue(thirdAnswer.isPresent());
     }
 }

@@ -10,18 +10,30 @@ import org.springframework.stereotype.Service;
 
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
+import pt.saudemin.hds.dtos.entities.ChoiceAnswerDTO;
+import pt.saudemin.hds.dtos.entities.ChoiceQuestionDTO;
+import pt.saudemin.hds.dtos.entities.FreeAnswerDTO;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
 import pt.saudemin.hds.dtos.entities.UserDTO;
+import pt.saudemin.hds.entities.ChoiceAnswer;
+import pt.saudemin.hds.entities.ChoiceQuestion;
+import pt.saudemin.hds.entities.FreeAnswer;
 import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.entities.base.Answer;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
+import pt.saudemin.hds.exceptions.GivenAnswersExceedQuestionPossibleAnswersException;
+import pt.saudemin.hds.mappers.AnswerMapper;
+import pt.saudemin.hds.mappers.ChoiceAnswerMapper;
+import pt.saudemin.hds.mappers.FreeAnswerMapper;
 import pt.saudemin.hds.mappers.UserMapper;
+import pt.saudemin.hds.repositories.AnswerRepository;
 import pt.saudemin.hds.repositories.UserRepository;
 import pt.saudemin.hds.services.UserService;
 import pt.saudemin.hds.utils.TokenUtils;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +43,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AnswerRepository<FreeAnswer> freeAnswerRepository;
+
+    @Autowired
+    private AnswerRepository<ChoiceAnswer> choiceAnswerRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -51,7 +69,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO create(UserDTO userDTO) {
+    @Transactional
+    public UserDTO create(UserDTO userDTO) throws AttachingInquiriesToAdminException {
         if (userDTO.getIsAdmin() && userDTO.getInquiries() != null) throw new AttachingInquiriesToAdminException();
 
         var user = UserMapper.INSTANCE.userDTOToUser(userDTO);
@@ -60,7 +79,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO update(UpdateUserDTO updateUserDTO) {
+    @Transactional
+    public UserDTO update(UpdateUserDTO updateUserDTO) throws AttachingInquiriesToAdminException {
         var userByPersonalId = userRepository.findByPersonalId(updateUserDTO.getOldPersonalId());
         var userEntity = UserMapper.INSTANCE.userDTOToUser(updateUserDTO);
         UserDTO updatedUserDTO;
@@ -103,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Boolean isIdDuplicate(long id) {
-        return (userRepository.findById(id).isPresent());
+        return userRepository.findById(id).isPresent();
     }
 
     @Override
@@ -120,8 +140,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean setUserAnswersToQuestionnaire(List<AnswerDTO> answers) {
-        throw new UnsupportedOperationException("Operation not supported yet.");
+    public Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws GivenAnswersExceedQuestionPossibleAnswersException {
+        for (AnswerDTO answer : answers) {
+            if (answer instanceof ChoiceAnswerDTO) {
+                var choiceAnswer = (ChoiceAnswerDTO) answer;
+                var associatedQuestionPossibleAnswers = ((ChoiceQuestionDTO) choiceAnswer.getAnswerId().getQuestion()).getPossibleAnswers();
+
+                if (choiceAnswer.getAnswerChoices().size() > associatedQuestionPossibleAnswers) {
+                    throw new GivenAnswersExceedQuestionPossibleAnswersException();
+                }
+            }
+
+            try {
+                if (answer instanceof FreeAnswerDTO) {
+                    freeAnswerRepository.save(FreeAnswerMapper.INSTANCE.freeAnswerDTOToFreeAnswer((FreeAnswerDTO) answer));
+                } else if (answer instanceof ChoiceAnswerDTO) {
+                    choiceAnswerRepository.save(ChoiceAnswerMapper.INSTANCE.choiceAnswerDTOToChoiceAnswer((ChoiceAnswerDTO) answer));
+                }
+            } catch (Exception e) {
+                log.error("Error saving answers! Exception details: " + e.getMessage());
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

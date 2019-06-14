@@ -39,6 +39,7 @@ public class ShiroConfig {
     @Bean
     public ShiroFilterChainDefinition shiroFilterChainDefinition() {
         DefaultShiroFilterChainDefinition chainDefinition = new DefaultShiroFilterChainDefinition();
+        chainDefinition.addPathDefinition("/error/**", "jwtv[admin, user]");
         chainDefinition.addPathDefinition("/admin/**", "jwtv[admin]");
         chainDefinition.addPathDefinition("/**", "jwtv[user]");
         return chainDefinition;
