@@ -16,6 +16,7 @@ import pt.saudemin.hds.mappers.QuestionMapper;
 import pt.saudemin.hds.repositories.QuestionRepository;
 import pt.saudemin.hds.services.QuestionService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,45 +56,51 @@ public class QuestionServiceImpl implements QuestionService {
     public List<ChoiceQuestionDTO> getAllChoiceQuestions() {
         return questionRepository.findAll().stream()
                 .filter(ChoiceQuestion.class::isInstance)
-                .map(question -> (ChoiceQuestion) question)
+                .map(ChoiceQuestion.class::cast)
                 .map(ChoiceQuestionMapper.INSTANCE::questionToQuestionDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public QuestionDTO getById(long id) {
+    @SuppressWarnings("unchecked")
+    public <T extends QuestionDTO> T getById(long id) {
         var question = questionRepository.findById(id);
 
-        return question.map(q -> q instanceof ChoiceQuestion ?
+        return (T) question.map(q -> q instanceof ChoiceQuestion ?
                 ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO((ChoiceQuestion) q) :
                 QuestionMapper.INSTANCE.questionToQuestionDTO(q)).orElse(null);
     }
 
     @Override
+    @Transactional
     public QuestionDTO create(QuestionDTO questionDTO) {
-        Question question = QuestionMapper.INSTANCE.questionDTOToQuestion(questionDTO);
+        var question = QuestionMapper.INSTANCE.questionDTOToQuestion(questionDTO);
 
-        return QuestionMapper.INSTANCE.questionToQuestionDTO(createQuestion(question));
+        return QuestionMapper.INSTANCE.questionToQuestionDTO(questionRepository.save(question));
     }
 
     @Override
+    @Transactional
     public ChoiceQuestionDTO create(ChoiceQuestionDTO choiceQuestionDTO) {
-        ChoiceQuestion choiceQuestion = ChoiceQuestionMapper.INSTANCE.questionDTOToQuestion(choiceQuestionDTO);
+        var choiceQuestion = ChoiceQuestionMapper.INSTANCE.questionDTOToQuestion(choiceQuestionDTO);
 
-        return ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO(createQuestion(choiceQuestion));
+        return ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO(questionRepository.save(choiceQuestion));
     }
 
     @Override
+    @Transactional
     public QuestionDTO update(QuestionDTO questionDTO) {
         return QuestionMapper.INSTANCE.questionToQuestionDTO(updateQuestion(questionDTO));
     }
 
     @Override
+    @Transactional
     public ChoiceQuestionDTO update(ChoiceQuestionDTO choiceQuestionDTO) {
         return ChoiceQuestionMapper.INSTANCE.questionToQuestionDTO(updateQuestion(choiceQuestionDTO));
     }
 
     @Override
+    @Transactional
     public Boolean delete(long id) {
         try {
             questionRepository.deleteById(id);
@@ -103,10 +110,6 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         return true;
-    }
-
-    private <T extends Question> T createQuestion(T question) {
-        return questionRepository.save(question);
     }
 
     @SuppressWarnings("unchecked")

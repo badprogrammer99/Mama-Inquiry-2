@@ -7,6 +7,5 @@ import pt.saudemin.hds.entities.base.Answer;
 import pt.saudemin.hds.entities.base.AnswerId;
 
 @Repository
-public interface AnswerRepository<T extends Answer> extends JpaRepository<T, AnswerId> {
-
+public interface AnswerRepository extends JpaRepository<Answer, AnswerId> {
 }

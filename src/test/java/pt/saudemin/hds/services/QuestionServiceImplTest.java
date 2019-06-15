@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import pt.saudemin.hds.dtos.entities.ChoiceQuestionDTO;
 import pt.saudemin.hds.dtos.entities.QuestionDTO;
+import pt.saudemin.hds.entities.ChoiceQuestion;
 
 import javax.transaction.Transactional;
 
@@ -25,6 +26,13 @@ public class QuestionServiceImplTest {
         var genericQuestions = questionService.getAllGenericQuestions();
 
         Assert.assertTrue(genericQuestions.stream().noneMatch(question -> question instanceof ChoiceQuestionDTO));
+    }
+
+    @Test
+    public void testGetAllChoiceQuestions() {
+        var choiceQuestions = questionService.getAllChoiceQuestions();
+
+        Assert.assertTrue(choiceQuestions.stream().allMatch(ChoiceQuestionDTO.class::isInstance));
     }
 
     @Test

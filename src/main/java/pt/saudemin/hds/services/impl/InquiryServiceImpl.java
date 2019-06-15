@@ -14,6 +14,7 @@ import pt.saudemin.hds.mappers.InquiryMapper;
 import pt.saudemin.hds.repositories.InquiryRepository;
 import pt.saudemin.hds.services.InquiryService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
+    @Transactional
     public InquiryDTO create(InquiryDTO inquiryDTO) {
         var inquiry = InquiryMapper.INSTANCE.inquiryDTOToInquiry(inquiryDTO);
 
@@ -44,6 +46,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
+    @Transactional
     public InquiryDTO update(InquiryDTO inquiryDTO) {
         if (inquiryDTO.getId() == null) return null;
 
@@ -56,6 +59,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
+    @Transactional
     public Boolean delete(long id) {
         try {
             inquiryRepository.deleteById(id);

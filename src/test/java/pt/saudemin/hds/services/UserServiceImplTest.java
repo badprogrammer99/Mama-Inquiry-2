@@ -1,5 +1,6 @@
 package pt.saudemin.hds.services;
 
+import io.jsonwebtoken.Claims;
 import lombok.var;
 
 import org.junit.Assert;
@@ -26,6 +27,7 @@ import pt.saudemin.hds.mappers.UserMapper;
 import pt.saudemin.hds.repositories.AnswerChoiceRepository;
 import pt.saudemin.hds.repositories.AnswerRepository;
 import pt.saudemin.hds.repositories.UserRepository;
+import pt.saudemin.hds.utils.TokenUtils;
 
 import javax.transaction.Transactional;
 
@@ -44,7 +46,7 @@ public class UserServiceImplTest {
     private AnswerChoiceRepository answerChoiceRepository;
 
     @Autowired
-    private AnswerRepository<Answer> answerRepository;
+    private AnswerRepository answerRepository;
 
     @Autowired
     private UserService userService;
@@ -124,7 +126,16 @@ public class UserServiceImplTest {
         var loginInfoDTO = userService.authenticateUser(loginDTO);
 
         Assert.assertNotNull(loginInfoDTO);
-        Assert.assertNull(loginInfoDTO.getToken());
+
+        Claims tokenClaims = TokenUtils.getTokenClaims(loginInfoDTO.getToken());
+
+        Assert.assertEquals(loginDTO.getPersonalId().toString(), tokenClaims.getSubject());
+        Assert.assertNotNull(tokenClaims.get("role").toString().equals("admin")
+            ? "admin"
+            : (tokenClaims.get("role").toString().equals("user")
+                ? "user"
+                : null)
+        );
         Assert.assertEquals(loginInfoDTO.getPersonalId(), loginDTO.getPersonalId());
         Assert.assertEquals(loginInfoDTO.getIsAdmin(), true);
     }
@@ -159,7 +170,6 @@ public class UserServiceImplTest {
             add(new ChoiceAnswerDTO(new AnswerIdDTO(choiceQuestions.get(0), userDTO), "Atm XD", new ArrayList<AnswerChoiceDTO>(){{
                 add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(1L).get()));
                 add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(2L).get()));
-                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(3L).get()));
             }}));
         }};
 

@@ -9,7 +9,7 @@ public interface QuestionService {
     List<? extends QuestionDTO> getAll();
     List<QuestionDTO> getAllGenericQuestions();
     List<ChoiceQuestionDTO> getAllChoiceQuestions();
-    QuestionDTO getById(long id);
+    <T extends QuestionDTO> T getById(long id);
     QuestionDTO create(QuestionDTO questionDTO);
     ChoiceQuestionDTO create(ChoiceQuestionDTO choiceQuestionDTO);
     QuestionDTO update(QuestionDTO questionDTO);

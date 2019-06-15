@@ -18,13 +18,10 @@ import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
 import pt.saudemin.hds.dtos.entities.UserDTO;
 import pt.saudemin.hds.entities.ChoiceAnswer;
-import pt.saudemin.hds.entities.ChoiceQuestion;
 import pt.saudemin.hds.entities.FreeAnswer;
 import pt.saudemin.hds.entities.Inquiry;
-import pt.saudemin.hds.entities.base.Answer;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
 import pt.saudemin.hds.exceptions.GivenAnswersExceedQuestionPossibleAnswersException;
-import pt.saudemin.hds.mappers.AnswerMapper;
 import pt.saudemin.hds.mappers.ChoiceAnswerMapper;
 import pt.saudemin.hds.mappers.FreeAnswerMapper;
 import pt.saudemin.hds.mappers.UserMapper;
@@ -45,10 +42,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private AnswerRepository<FreeAnswer> freeAnswerRepository;
-
-    @Autowired
-    private AnswerRepository<ChoiceAnswer> choiceAnswerRepository;
+    private AnswerRepository answerRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -99,6 +93,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Boolean delete(int personalId) {
         try {
             userRepository.deleteByPersonalId(personalId);
@@ -127,6 +122,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Boolean setUserPassword(ChangePasswordDTO changePasswordDTO) {
         var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
 
@@ -140,6 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws GivenAnswersExceedQuestionPossibleAnswersException {
         for (AnswerDTO answer : answers) {
             if (answer instanceof ChoiceAnswerDTO) {
@@ -153,9 +150,9 @@ public class UserServiceImpl implements UserService {
 
             try {
                 if (answer instanceof FreeAnswerDTO) {
-                    freeAnswerRepository.save(FreeAnswerMapper.INSTANCE.freeAnswerDTOToFreeAnswer((FreeAnswerDTO) answer));
+                    answerRepository.save(FreeAnswerMapper.INSTANCE.freeAnswerDTOToFreeAnswer((FreeAnswerDTO) answer));
                 } else if (answer instanceof ChoiceAnswerDTO) {
-                    choiceAnswerRepository.save(ChoiceAnswerMapper.INSTANCE.choiceAnswerDTOToChoiceAnswer((ChoiceAnswerDTO) answer));
+                    answerRepository.save(ChoiceAnswerMapper.INSTANCE.choiceAnswerDTOToChoiceAnswer((ChoiceAnswerDTO) answer));
                 }
             } catch (Exception e) {
                 log.error("Error saving answers! Exception details: " + e.getMessage());

@@ -1,4 +1,4 @@
-package pt.saudemin.hds.config;
+package pt.saudemin.hds.config.shiro;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.DefaultSecurityManager;
@@ -11,6 +11,7 @@ import org.apache.shiro.mgt.SecurityManager;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import pt.saudemin.hds.config.filters.JWTVerifyingFilter;
 
 import javax.servlet.Filter;
 

@@ -9,6 +9,6 @@ import pt.saudemin.hds.entities.ChoiceQuestion;
 public interface ChoiceQuestionMapper {
 
     ChoiceQuestionMapper INSTANCE = Mappers.getMapper(ChoiceQuestionMapper.class);
-    ChoiceQuestionDTO questionToQuestionDTO(ChoiceQuestion question);
-    ChoiceQuestion questionDTOToQuestion(ChoiceQuestionDTO questionDTO);
+    ChoiceQuestionDTO questionToQuestionDTO(ChoiceQuestion choiceQuestion);
+    ChoiceQuestion questionDTOToQuestion(ChoiceQuestionDTO choiceQuestionDTO);
 }

@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import pt.saudemin.hds.entities.*;
-import pt.saudemin.hds.entities.base.Answer;
 import pt.saudemin.hds.entities.base.AnswerId;
 import pt.saudemin.hds.entities.base.Question;
 import pt.saudemin.hds.repositories.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 @Configuration
@@ -35,10 +33,7 @@ public class SeedDatabase implements CommandLineRunner {
     private AnswerChoiceRepository answerChoiceRepository;
 
     @Autowired
-    private AnswerRepository<FreeAnswer> freeAnswerRepository;
-
-    @Autowired
-    private AnswerRepository<ChoiceAnswer> choiceAnswerRepository;
+    private AnswerRepository answerRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -110,9 +105,9 @@ public class SeedDatabase implements CommandLineRunner {
                 add(answerChoiceRepository.findById(2L).get());
             }});
 
-            freeAnswerRepository.save(answer1);
-            freeAnswerRepository.save(answer2);
-            choiceAnswerRepository.save(answer3);
+            answerRepository.save(answer1);
+            answerRepository.save(answer2);
+            answerRepository.save(answer3);
         }
     }
 }

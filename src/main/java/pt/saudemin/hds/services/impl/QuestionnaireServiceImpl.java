@@ -12,6 +12,7 @@ import pt.saudemin.hds.mappers.QuestionnaireMapper;
 import pt.saudemin.hds.repositories.QuestionnaireRepository;
 import pt.saudemin.hds.services.QuestionnaireService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
     }
 
     @Override
+    @Transactional
     public QuestionnaireDTO create(QuestionnaireDTO questionnaireDTO) {
         var questionnaire = QuestionnaireMapper.INSTANCE.questionnaireDTOToQuestionnaire(questionnaireDTO);
 
@@ -45,6 +47,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
     }
 
     @Override
+    @Transactional
     public QuestionnaireDTO update(QuestionnaireDTO questionnaireDTO) {
         if (questionnaireDTO.getId() == null) return null;
 
@@ -57,6 +60,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
     }
 
     @Override
+    @Transactional
     public Boolean delete(long id) {
         try {
             questionnaireRepository.deleteById(id);

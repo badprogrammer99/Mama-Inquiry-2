@@ -1,5 +1,6 @@
 package pt.saudemin.hds.utils;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -16,5 +17,12 @@ public class TokenUtils {
                 .claim("role", user.getIsAdmin() ? "admin" : "user")
                 .signWith(Keys.hmacShaKeyFor(Constants.SECRET.getBytes()))
                 .compact();
+    }
+
+    public static Claims getTokenClaims(String jwt) {
+        return Jwts.parser()
+                .setSigningKey(Constants.SECRET.getBytes())
+                .parseClaimsJws(jwt.replace(Constants.TOKEN_PREFIX, ""))
+                .getBody();
     }
 }

@@ -1,4 +1,4 @@
-package pt.saudemin.hds.config;
+package pt.saudemin.hds.config.filters;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -9,6 +9,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import org.apache.shiro.web.filter.authz.RolesAuthorizationFilter;
+import pt.saudemin.hds.config.Constants;
+import pt.saudemin.hds.utils.TokenUtils;
 
 import java.util.Arrays;
 
@@ -28,10 +30,7 @@ public class JWTVerifyingFilter extends RolesAuthorizationFilter {
             return false;
         }
 
-        Claims claims = Jwts.parser()
-                .setSigningKey(Constants.SECRET.getBytes())
-                .parseClaimsJws(jwt.replace(Constants.TOKEN_PREFIX, ""))
-                .getBody();
+        Claims claims = TokenUtils.getTokenClaims(jwt);
 
         String claim = claims.get("role").toString();
         String[] requiredRoles = (String[]) mappedValue;
