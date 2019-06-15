@@ -101,8 +101,8 @@ public class SeedDatabase implements CommandLineRunner {
             var answer1 = new FreeAnswer(new AnswerId(question1, user), null, "Atm XD");
             var answer2 = new FreeAnswer(new AnswerId(question2, user), null, "Atm XD");
             var answer3 = new ChoiceAnswer(new AnswerId(question3, user), "Atm XD", new HashSet<AnswerChoice>(){{
-                add(answerChoiceRepository.findById(1L).get());
-                add(answerChoiceRepository.findById(2L).get());
+                add(answerChoiceRepository.findById(1L).isPresent() ? answerChoiceRepository.findById(1L).get() : null);
+                add(answerChoiceRepository.findById(2L).isPresent() ? answerChoiceRepository.findById(2L).get() : null);
             }});
 
             answerRepository.save(answer1);
