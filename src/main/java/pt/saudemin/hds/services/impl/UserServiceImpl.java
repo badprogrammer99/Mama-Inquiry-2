@@ -4,26 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
-import pt.saudemin.hds.dtos.entities.ChoiceAnswerDTO;
-import pt.saudemin.hds.dtos.entities.ChoiceQuestionDTO;
-import pt.saudemin.hds.dtos.entities.FreeAnswerDTO;
+import pt.saudemin.hds.dtos.entities.*;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
-import pt.saudemin.hds.dtos.entities.UserDTO;
-import pt.saudemin.hds.entities.ChoiceAnswer;
-import pt.saudemin.hds.entities.FreeAnswer;
 import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
-import pt.saudemin.hds.exceptions.GivenAnswersExceedQuestionPossibleAnswersException;
+import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
+import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
 import pt.saudemin.hds.mappers.ChoiceAnswerMapper;
 import pt.saudemin.hds.mappers.FreeAnswerMapper;
+import pt.saudemin.hds.mappers.QuestionMapper;
 import pt.saudemin.hds.mappers.UserMapper;
 import pt.saudemin.hds.repositories.AnswerRepository;
 import pt.saudemin.hds.repositories.UserRepository;
@@ -31,6 +29,7 @@ import pt.saudemin.hds.services.UserService;
 import pt.saudemin.hds.utils.TokenUtils;
 
 import javax.transaction.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +42,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AnswerRepository answerRepository;
+
+    @Autowired
+    private Subject subject;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -60,6 +62,16 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.findByPersonalId(id);
 
         return user.map(UserMapper.INSTANCE::userToUserDTO).orElse(null);
+    }
+
+    @Override
+    public UserDTO getCurrentlyAuthenticatedUser() {
+        return getByPersonalId(Integer.valueOf((String) subject.getPrincipal()));
+    }
+
+    @Override
+    public List<InquiryDTO> getUserInformation(int id) {
+        return getByPersonalId(id).getInquiries();
     }
 
     @Override
@@ -117,13 +129,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean isIdDuplicate(long id) {
-        return userRepository.findById(id).isPresent();
+    public Boolean isIdDuplicate(int id) {
+        return userRepository.findByPersonalId(id).isPresent();
     }
 
     @Override
     @Transactional
-    public Boolean setUserPassword(ChangePasswordDTO changePasswordDTO) {
+    public Boolean changeUserPassword(ChangePasswordDTO changePasswordDTO) {
         var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
 
         if (user.isPresent() && bCryptPasswordEncoder.matches(changePasswordDTO.getOldPassword(), user.get().getPassword())) {
@@ -137,16 +149,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws GivenAnswersExceedQuestionPossibleAnswersException {
+    public Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws PossibleAnswersExceededException, NotAssociatedToInquiryException {
         for (AnswerDTO answer : answers) {
             if (answer instanceof ChoiceAnswerDTO) {
                 var choiceAnswer = (ChoiceAnswerDTO) answer;
+                var associatedInquiry = QuestionMapper.INSTANCE.questionDTOToQuestion(choiceAnswer.getAnswerId().getQuestion()).getQuestionnaire().getInquiry();
                 var associatedQuestionPossibleAnswers = ((ChoiceQuestionDTO) choiceAnswer.getAnswerId().getQuestion()).getPossibleAnswers();
 
+                // Prevent users from answering questions in inquiries they are not associated with.
+                if (getCurrentlyAuthenticatedUser().getInquiries().stream().noneMatch(inquiry -> inquiry.getId().equals(associatedInquiry.getId()))) {
+                    throw new NotAssociatedToInquiryException();
+                }
+
+                // Prevent users from answering more times than the specified limit.
                 if (choiceAnswer.getAnswerChoices().size() > associatedQuestionPossibleAnswers) {
-                    throw new GivenAnswersExceedQuestionPossibleAnswersException();
+                    throw new PossibleAnswersExceededException("User answered " + choiceAnswer.getAnswerChoices().size()
+                            + " times to a question which only allows " + associatedQuestionPossibleAnswers + " possible answers!");
                 }
             }
+
+            answer.getAnswerId().setUser(getCurrentlyAuthenticatedUser());
 
             try {
                 if (answer instanceof FreeAnswerDTO) {

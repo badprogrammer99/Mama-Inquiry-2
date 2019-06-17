@@ -28,6 +28,6 @@ public class Inquiry {
     @OneToMany(mappedBy = "inquiry", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Questionnaire> questionnaires;
 
-    @ManyToMany(mappedBy = "inquiries")
+    @ManyToMany(mappedBy = "inquiries", fetch = FetchType.LAZY)
     private Set<User> users;
 }

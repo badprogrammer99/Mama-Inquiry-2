@@ -12,7 +12,6 @@ import javax.persistence.Entity;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 public class FreeAnswer extends Answer {
 
     @Column

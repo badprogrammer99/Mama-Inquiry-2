@@ -9,5 +9,8 @@ public class Constants {
     public static final String GET_GENERIC_QUESTION_PARAM = "generic";
     public static final String GET_CHOICE_QUESTION_PARAM = "choice";
 
+    public static final String ADMIN_PATH = "/admin";
+    public static final String USER_PATH = "/user";
     public static final String LOGIN_PATH = "/login";
+    public static final String CHANGE_PASSWORD_PATH = "/change-password";
 }

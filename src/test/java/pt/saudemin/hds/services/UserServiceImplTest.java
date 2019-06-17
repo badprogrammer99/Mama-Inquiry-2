@@ -17,10 +17,10 @@ import pt.saudemin.hds.dtos.entities.*;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 import pt.saudemin.hds.dtos.login.LoginDTO;
-import pt.saudemin.hds.entities.base.Answer;
 import pt.saudemin.hds.entities.base.AnswerId;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
-import pt.saudemin.hds.exceptions.GivenAnswersExceedQuestionPossibleAnswersException;
+import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
+import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
 import pt.saudemin.hds.mappers.AnswerChoiceMapper;
 import pt.saudemin.hds.mappers.QuestionMapper;
 import pt.saudemin.hds.mappers.UserMapper;
@@ -142,13 +142,13 @@ public class UserServiceImplTest {
 
     @Test
     public void testCheckDuplicateIds() {
-        Assert.assertTrue(userService.isIdDuplicate(2L));
+        Assert.assertTrue(userService.isIdDuplicate(2));
     }
 
     @Test
     public void testChangePassword() {
         var changePasswordDTO = new ChangePasswordDTO(170100228, "123456", "abcdef");
-        Assert.assertTrue(userService.setUserPassword(changePasswordDTO));
+        Assert.assertTrue(userService.changeUserPassword(changePasswordDTO));
 
         var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
 
@@ -157,7 +157,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testSetAnswers() throws GivenAnswersExceedQuestionPossibleAnswersException {
+    public void testSetAnswers() throws PossibleAnswersExceededException, NotAssociatedToInquiryException {
         var genericQuestions = questionService.getAllGenericQuestions();
         var choiceQuestions = questionService.getAllChoiceQuestions();
 

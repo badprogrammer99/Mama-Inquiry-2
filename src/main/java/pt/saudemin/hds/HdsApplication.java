@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class HdsApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(HdsApplication.class, args);
     }
@@ -19,4 +18,5 @@ public class HdsApplication {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

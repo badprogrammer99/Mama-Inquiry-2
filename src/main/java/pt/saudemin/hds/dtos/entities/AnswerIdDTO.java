@@ -1,5 +1,6 @@
 package pt.saudemin.hds.dtos.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -18,6 +19,6 @@ public class AnswerIdDTO implements Serializable {
     @NotBlank(message = "A question is required!")
     private QuestionDTO question;
 
-    @NotBlank(message = "A user is required!")
+    @JsonIgnore
     private UserDTO user;
 }

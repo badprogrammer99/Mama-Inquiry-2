@@ -124,6 +124,6 @@ public class QuestionServiceImpl implements QuestionService {
                 ChoiceQuestionMapper.INSTANCE.questionDTOToQuestion((ChoiceQuestionDTO) questionDTO) :
                 QuestionMapper.INSTANCE.questionDTOToQuestion(questionDTO);
 
-        return questionRepository.save((T) question);
+        return (T) questionRepository.save(question);
     }
 }

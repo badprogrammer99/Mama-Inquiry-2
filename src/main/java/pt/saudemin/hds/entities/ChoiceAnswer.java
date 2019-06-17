@@ -12,7 +12,6 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
 public class ChoiceAnswer extends Answer {
 
     @ManyToMany(fetch = FetchType.LAZY)

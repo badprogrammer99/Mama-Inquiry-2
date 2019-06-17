@@ -9,24 +9,26 @@ import org.apache.shiro.spring.web.config.DefaultShiroFilterChainDefinition;
 import org.apache.shiro.spring.web.config.ShiroFilterChainDefinition;
 import org.apache.shiro.mgt.SecurityManager;
 
+import org.apache.shiro.subject.Subject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+
+import pt.saudemin.hds.config.Constants;
 import pt.saudemin.hds.config.filters.JWTVerifyingFilter;
 
 import javax.servlet.Filter;
 
 import java.util.Map;
 
-/***
- * FIX YOUR FUCKING CANCEROUS INI REALM AUTO-CONFIGURATION BECAUSE THE URLS THERE ARE SIMPLY NOT RECOGNIZED AT ALL LMFAO.
- * @see "https://shiro.apache.org/spring-boot.html"
- */
 @Configuration
 public class ShiroConfig {
 
     @Bean
     public Realm realm() {
         SimpleAccountRealm realm = new SimpleAccountRealm();
+        realm.addRole("admin");
+        realm.addRole("user");
         DefaultSecurityManager securityManager = new DefaultSecurityManager(realm);
         SecurityUtils.setSecurityManager(securityManager);
         return realm;
@@ -40,9 +42,9 @@ public class ShiroConfig {
     @Bean
     public ShiroFilterChainDefinition shiroFilterChainDefinition() {
         DefaultShiroFilterChainDefinition chainDefinition = new DefaultShiroFilterChainDefinition();
-        chainDefinition.addPathDefinition("/error/**", "jwtv[admin, user]");
-        chainDefinition.addPathDefinition("/admin/**", "jwtv[admin]");
-        chainDefinition.addPathDefinition("/**", "jwtv[user]");
+        chainDefinition.addPathDefinition(Constants.ADMIN_PATH + "/**", "jwtv[admin]");
+        chainDefinition.addPathDefinition(Constants.USER_PATH + "/**", "jwtv[user]");
+        chainDefinition.addPathDefinition("/**", "jwtv[admin, user]");
         return chainDefinition;
     }
 
@@ -57,5 +59,11 @@ public class ShiroConfig {
         filterFactoryBean.setFilters(filterMap);
 
         return filterFactoryBean;
+    }
+
+    @Bean
+    @Lazy
+    public Subject getCurrentlyAuthenticatedSubject() {
+        return SecurityUtils.getSubject();
     }
 }
