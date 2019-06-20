@@ -26,11 +26,11 @@ public class UserController extends BaseUserController {
     }
 
     @GetMapping(value = "inquiries")
-    public ResponseEntity<Object> getUserInquiries() {
+    public ResponseEntity<Object> getUserInformation() {
         return new ResponseEntity<>(userService.getUserInformation(userService.getCurrentlyAuthenticatedUser().getPersonalId()), HttpStatus.OK);
     }
 
-    @PostMapping(value = "set/answers")
+    @PostMapping(value = "answers")
     public ResponseEntity<Object> sendUserAnswers(@RequestBody @Valid List<AnswerDTO> answers) {
         try {
             return new ResponseEntity<>(userService.setUserAnswersToQuestions(answers), HttpStatus.OK);
