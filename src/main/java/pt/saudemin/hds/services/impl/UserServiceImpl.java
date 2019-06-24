@@ -9,21 +9,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import pt.saudemin.hds.config.Constants;
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.entities.*;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
+import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTOList;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
+import pt.saudemin.hds.entities.ChoiceQuestion;
 import pt.saudemin.hds.entities.Inquiry;
+import pt.saudemin.hds.entities.base.Question;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
+import pt.saudemin.hds.exceptions.ErraticInputException;
 import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
 import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
+import pt.saudemin.hds.exceptions.base.AbstractSetUserAnswersException;
 import pt.saudemin.hds.mappers.ChoiceAnswerMapper;
 import pt.saudemin.hds.mappers.FreeAnswerMapper;
-import pt.saudemin.hds.mappers.QuestionMapper;
 import pt.saudemin.hds.mappers.UserMapper;
 import pt.saudemin.hds.repositories.AnswerRepository;
+import pt.saudemin.hds.repositories.QuestionRepository;
 import pt.saudemin.hds.repositories.UserRepository;
 import pt.saudemin.hds.services.UserService;
 import pt.saudemin.hds.utils.TokenUtils;
@@ -41,13 +47,21 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
     private AnswerRepository answerRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
     private Subject subject;
 
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @Override
+    public UserDTO getCurrentlyAuthenticatedUser() {
+        return getByPersonalId(Integer.valueOf((String) subject.getPrincipal()));
+    }
 
     @Override
     public List<UserDTO> getAllUsers() {
@@ -62,11 +76,6 @@ public class UserServiceImpl implements UserService {
         var user = userRepository.findByPersonalId(id);
 
         return user.map(UserMapper.INSTANCE::userToUserDTO).orElse(null);
-    }
-
-    @Override
-    public UserDTO getCurrentlyAuthenticatedUser() {
-        return getByPersonalId(Integer.valueOf((String) subject.getPrincipal()));
     }
 
     @Override
@@ -148,18 +157,49 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws PossibleAnswersExceededException, NotAssociatedToInquiryException {
-        for (AnswerDTO answer : answers) {
+    @Transactional(rollbackOn = AbstractSetUserAnswersException.class)
+    public Boolean setUserAnswersToQuestions(AnswerDTOList answers) throws PossibleAnswersExceededException,
+            NotAssociatedToInquiryException, ErraticInputException {
+
+        for (AnswerDTO answer : answers.getAnswers()) {
+            Question associatedQuestionEntity;
+
+            if (questionRepository.findById(answer.getAnswerId().getQuestion().getId()).isPresent()) {
+                associatedQuestionEntity = questionRepository.findById(answer.getAnswerId().getQuestion().getId()).get();
+            } else {
+                throw new ErraticInputException("The question with the ID of " +
+                        answer.getAnswerId().getQuestion().getId() + " doesn't exist.");
+            }
+
+            var respectiveQuestionEntityType = Constants.ANSWER_QUESTION_MAPPING.get(answer.getClass().getSimpleName());
+
+            if (!associatedQuestionEntity.getClass().getSimpleName().equals(respectiveQuestionEntityType)) {
+                throw new ErraticInputException("User is trying to provide an illegal answer to the question ID of " +
+                        associatedQuestionEntity.getId() + ".");
+            }
+
+            var associatedInquiry = associatedQuestionEntity.getQuestionnaire().getInquiry();
+
+            // Prevent users from answering questions in inquiries they are not associated with.
+            if (getCurrentlyAuthenticatedUser().getInquiries().stream().noneMatch(inquiry -> inquiry.getId().equals(associatedInquiry.getId()))) {
+                String msg = "The user with the personal ID of "
+                        + getCurrentlyAuthenticatedUser().getPersonalId() + ", who is associated with the inquiries "
+                        + getCurrentlyAuthenticatedUser().getInquiries()
+                            .stream()
+                            .map(InquiryDTO::getName)
+                            .collect(Collectors.joining(", "))
+                        + " tried to answer questions of the inquiry "
+                        + associatedInquiry.getName() + ". This is considered a"
+                        + " security violation and so, the transaction of the user answers"
+                        + " cannot continue.";
+
+                log.warn(msg);
+                throw new NotAssociatedToInquiryException(msg);
+            }
+
             if (answer instanceof ChoiceAnswerDTO) {
                 var choiceAnswer = (ChoiceAnswerDTO) answer;
-                var associatedInquiry = QuestionMapper.INSTANCE.questionDTOToQuestion(choiceAnswer.getAnswerId().getQuestion()).getQuestionnaire().getInquiry();
-                var associatedQuestionPossibleAnswers = ((ChoiceQuestionDTO) choiceAnswer.getAnswerId().getQuestion()).getPossibleAnswers();
-
-                // Prevent users from answering questions in inquiries they are not associated with.
-                if (getCurrentlyAuthenticatedUser().getInquiries().stream().noneMatch(inquiry -> inquiry.getId().equals(associatedInquiry.getId()))) {
-                    throw new NotAssociatedToInquiryException();
-                }
+                var associatedQuestionPossibleAnswers = ((ChoiceQuestion) associatedQuestionEntity).getPossibleAnswers();
 
                 // Prevent users from answering more times than the specified limit.
                 if (choiceAnswer.getAnswerChoices().size() > associatedQuestionPossibleAnswers) {

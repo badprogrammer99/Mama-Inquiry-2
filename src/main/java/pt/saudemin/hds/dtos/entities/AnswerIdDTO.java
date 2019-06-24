@@ -16,7 +16,7 @@ public class AnswerIdDTO implements Serializable {
     @Setter(AccessLevel.NONE)
     private static final long serialVersionUID = -6141892831459744998L;
 
-    @NotBlank(message = "A question is required!")
+    @NotNull(message = "A question object is required!")
     private QuestionDTO question;
 
     @JsonIgnore

@@ -6,13 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import pt.saudemin.hds.controllers.user.base.BaseUserController;
-import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
-import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
-import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
+import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTOList;
+import pt.saudemin.hds.exceptions.base.AbstractSetUserAnswersException;
 import pt.saudemin.hds.services.UserService;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 public class UserController extends BaseUserController {
@@ -31,12 +29,10 @@ public class UserController extends BaseUserController {
     }
 
     @PostMapping(value = "answers")
-    public ResponseEntity<Object> sendUserAnswers(@RequestBody @Valid List<AnswerDTO> answers) {
+    public ResponseEntity<Object> sendUserAnswers(@RequestBody @Valid AnswerDTOList answers) {
         try {
             return new ResponseEntity<>(userService.setUserAnswersToQuestions(answers), HttpStatus.OK);
-        } catch (NotAssociatedToInquiryException e) {
-            return new ResponseEntity<>("User is not authorized to answer to questions of this inquiry!", HttpStatus.FORBIDDEN);
-        } catch (PossibleAnswersExceededException e) {
+        } catch (AbstractSetUserAnswersException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

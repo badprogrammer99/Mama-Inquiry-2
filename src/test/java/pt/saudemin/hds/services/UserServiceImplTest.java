@@ -16,9 +16,11 @@ import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.entities.*;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
+import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTOList;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.entities.base.AnswerId;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
+import pt.saudemin.hds.exceptions.ErraticInputException;
 import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
 import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
 import pt.saudemin.hds.mappers.AnswerChoiceMapper;
@@ -157,7 +159,8 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testSetAnswers() throws PossibleAnswersExceededException, NotAssociatedToInquiryException {
+    public void testSetAnswers() throws PossibleAnswersExceededException, NotAssociatedToInquiryException,
+            ErraticInputException {
         var genericQuestions = questionService.getAllGenericQuestions();
         var choiceQuestions = questionService.getAllChoiceQuestions();
 
@@ -173,7 +176,7 @@ public class UserServiceImplTest {
             }}));
         }};
 
-        Assert.assertTrue(userService.setUserAnswersToQuestions(answers));
+        Assert.assertTrue(userService.setUserAnswersToQuestions(new AnswerDTOList(answers)));
 
         var firstAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(genericQuestions.get(0)), user));
         var secondAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(genericQuestions.get(1)), user));
