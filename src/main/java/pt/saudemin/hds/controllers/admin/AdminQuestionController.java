@@ -39,7 +39,7 @@ public class AdminQuestionController extends BaseAdminController {
     public ResponseEntity<Object> getQuestionById(@PathVariable("id") Integer id) {
         return Optional
                 .ofNullable(questionService.getById(id))
-                .map(question -> new ResponseEntity<Object>(question, HttpStatus.OK))
+                .map(question -> new ResponseEntity<>(question, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>("No records have been found.", HttpStatus.NOT_FOUND));
     }
 
@@ -73,7 +73,8 @@ public class AdminQuestionController extends BaseAdminController {
         return Optional
                 .ofNullable(questionService.update(choiceQuestionDTO))
                 .map(question -> new ResponseEntity<Object>(question, HttpStatus.OK))
-                .get();
+                .orElseGet(() -> new ResponseEntity<>("Couldn't update the question, " +
+                        "either you didn't supply an ID or the record associated to it doesn't exist. ", HttpStatus.BAD_REQUEST));
     }
 
     @DeleteMapping(value = "question")
