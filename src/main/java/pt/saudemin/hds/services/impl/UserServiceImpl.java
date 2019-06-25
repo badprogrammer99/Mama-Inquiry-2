@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import pt.saudemin.hds.config.Constants;
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.entities.*;
@@ -21,7 +20,7 @@ import pt.saudemin.hds.entities.ChoiceQuestion;
 import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.entities.base.Question;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
-import pt.saudemin.hds.exceptions.ErraticInputException;
+import pt.saudemin.hds.exceptions.ErraticAnswerInputException;
 import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
 import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
 import pt.saudemin.hds.exceptions.base.AbstractSetUserAnswersException;
@@ -36,7 +35,9 @@ import pt.saudemin.hds.utils.TokenUtils;
 
 import javax.transaction.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,6 +58,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private Subject subject;
+
+    @SuppressWarnings("serial")
+    private static final Map<String, String> ANSWER_QUESTION_MAPPING = new HashMap<String, String>() {{
+        put(FreeAnswerDTO.class.getSimpleName(), Question.class.getSimpleName());
+        put(ChoiceAnswerDTO.class.getSimpleName(), ChoiceQuestion.class.getSimpleName());
+    }};
 
     @Override
     public UserDTO getCurrentlyAuthenticatedUser() {
@@ -157,24 +164,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackOn = AbstractSetUserAnswersException.class)
-    public Boolean setUserAnswersToQuestions(AnswerDTOList answers) throws PossibleAnswersExceededException,
-            NotAssociatedToInquiryException, ErraticInputException {
+    @Transactional(rollbackOn = Exception.class)
+    public Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws PossibleAnswersExceededException,
+            NotAssociatedToInquiryException, ErraticAnswerInputException {
 
-        for (AnswerDTO answer : answers.getAnswers()) {
+        for (AnswerDTO answer : answers) {
             Question associatedQuestionEntity;
 
             if (questionRepository.findById(answer.getAnswerId().getQuestion().getId()).isPresent()) {
                 associatedQuestionEntity = questionRepository.findById(answer.getAnswerId().getQuestion().getId()).get();
             } else {
-                throw new ErraticInputException("The question with the ID of " +
+                throw new ErraticAnswerInputException("The question with the ID of " +
                         answer.getAnswerId().getQuestion().getId() + " doesn't exist.");
             }
 
-            var respectiveQuestionEntityType = Constants.ANSWER_QUESTION_MAPPING.get(answer.getClass().getSimpleName());
+            var respectiveQuestionEntityType = ANSWER_QUESTION_MAPPING.get(answer.getClass().getSimpleName());
 
             if (!associatedQuestionEntity.getClass().getSimpleName().equals(respectiveQuestionEntityType)) {
-                throw new ErraticInputException("User is trying to provide an illegal answer to the question ID of " +
+                throw new ErraticAnswerInputException("User is trying to provide an illegal answer to the question ID of " +
                         associatedQuestionEntity.getId() + ".");
             }
 
@@ -210,15 +217,10 @@ public class UserServiceImpl implements UserService {
 
             answer.getAnswerId().setUser(getCurrentlyAuthenticatedUser());
 
-            try {
-                if (answer instanceof FreeAnswerDTO) {
-                    answerRepository.save(FreeAnswerMapper.INSTANCE.freeAnswerDTOToFreeAnswer((FreeAnswerDTO) answer));
-                } else if (answer instanceof ChoiceAnswerDTO) {
-                    answerRepository.save(ChoiceAnswerMapper.INSTANCE.choiceAnswerDTOToChoiceAnswer((ChoiceAnswerDTO) answer));
-                }
-            } catch (Exception e) {
-                log.error("Error saving answers! Exception details: " + e.getMessage());
-                return false;
+            if (answer instanceof FreeAnswerDTO) {
+                answerRepository.save(FreeAnswerMapper.INSTANCE.freeAnswerDTOToFreeAnswer((FreeAnswerDTO) answer));
+            } else if (answer instanceof ChoiceAnswerDTO) {
+                answerRepository.save(ChoiceAnswerMapper.INSTANCE.choiceAnswerDTOToChoiceAnswer((ChoiceAnswerDTO) answer));
             }
         }
 

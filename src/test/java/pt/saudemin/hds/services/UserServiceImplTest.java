@@ -3,7 +3,12 @@ package pt.saudemin.hds.services;
 import io.jsonwebtoken.Claims;
 import lombok.var;
 
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.realm.Realm;
+import org.apache.shiro.realm.SimpleAccountRealm;
+import org.apache.shiro.subject.Subject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -16,11 +21,13 @@ import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.entities.*;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
-import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTOList;
 import pt.saudemin.hds.dtos.login.LoginDTO;
+import pt.saudemin.hds.entities.ChoiceAnswer;
+import pt.saudemin.hds.entities.FreeAnswer;
+import pt.saudemin.hds.entities.Inquiry;
 import pt.saudemin.hds.entities.base.AnswerId;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
-import pt.saudemin.hds.exceptions.ErraticInputException;
+import pt.saudemin.hds.exceptions.ErraticAnswerInputException;
 import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
 import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
 import pt.saudemin.hds.mappers.AnswerChoiceMapper;
@@ -34,12 +41,19 @@ import pt.saudemin.hds.utils.TokenUtils;
 import javax.transaction.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 public class UserServiceImplTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private QuestionService questionService;
 
     @Autowired
     private UserRepository userRepository;
@@ -51,17 +65,28 @@ public class UserServiceImplTest {
     private AnswerRepository answerRepository;
 
     @Autowired
-    private UserService userService;
+    private Realm realm;
 
     @Autowired
-    private QuestionService questionService;
+    private Subject subject;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private static final int ADMIN_USER_ID = 170100228;
+    private static final int NON_ADMIN_USER_ID = 170100231;
+
+    @Before
+    public void init() {
+        var user = userRepository.findByPersonalId(NON_ADMIN_USER_ID).get();
+
+        ((SimpleAccountRealm) realm).addAccount(user.getPersonalId().toString(), user.getPassword());
+        subject.login(new UsernamePasswordToken(user.getPersonalId().toString(), user.getPassword()));
+    }
+
     @Test
     public void testGetUserById() {
-        var personalId = 170100228;
+        var personalId = NON_ADMIN_USER_ID;
 
         var user = userService.getByPersonalId(personalId);
 
@@ -96,7 +121,7 @@ public class UserServiceImplTest {
     public void testUpdateUser() throws AttachingInquiriesToAdminException {
         var userDTO = new UpdateUserDTO(null,  170100481, "Jajaers xd", false, new ArrayList<InquiryDTO>() {{
             new InquiryDTO(2L, null, null);
-        }}, 170100231);
+        }}, NON_ADMIN_USER_ID);
 
         var updatedUser = userService.update(userDTO);
         var getUpdatedUser = userService.getByPersonalId(170100481);
@@ -116,7 +141,7 @@ public class UserServiceImplTest {
 
     @Test
     public void testDeleteUser() {
-        var id = 170100228;
+        var id = ADMIN_USER_ID;
 
         Assert.assertTrue(userService.delete(id));
         Assert.assertNull(userService.getByPersonalId(id));
@@ -124,7 +149,7 @@ public class UserServiceImplTest {
 
     @Test
     public void testLoginUser() {
-        var loginDTO = new LoginDTO(170100228, "123456");
+        var loginDTO = new LoginDTO(ADMIN_USER_ID, "123456");
         var loginInfoDTO = userService.authenticateUser(loginDTO);
 
         Assert.assertNotNull(loginInfoDTO);
@@ -144,12 +169,12 @@ public class UserServiceImplTest {
 
     @Test
     public void testCheckDuplicateIds() {
-        Assert.assertTrue(userService.isIdDuplicate(2));
+        Assert.assertTrue(userService.isIdDuplicate(ADMIN_USER_ID));
     }
 
     @Test
     public void testChangePassword() {
-        var changePasswordDTO = new ChangePasswordDTO(170100228, "123456", "abcdef");
+        var changePasswordDTO = new ChangePasswordDTO(ADMIN_USER_ID, "123456", "abcdef");
         Assert.assertTrue(userService.changeUserPassword(changePasswordDTO));
 
         var user = userRepository.findByPersonalId(changePasswordDTO.getPersonalId());
@@ -160,11 +185,19 @@ public class UserServiceImplTest {
 
     @Test
     public void testSetAnswers() throws PossibleAnswersExceededException, NotAssociatedToInquiryException,
-            ErraticInputException {
+            ErraticAnswerInputException {
+        var userEntity = userRepository.findByPersonalId(NON_ADMIN_USER_ID).get();
+        userEntity.setInquiries(new HashSet<Inquiry>() {{
+            add(new Inquiry(1L, null, null, null));
+            add(new Inquiry(2L, null, null,null));
+        }});
+
+        userRepository.save(userEntity);
+
         var genericQuestions = questionService.getAllGenericQuestions();
         var choiceQuestions = questionService.getAllChoiceQuestions();
 
-        var userDTO = userService.getByPersonalId(170100231);
+        var userDTO = userService.getByPersonalId(NON_ADMIN_USER_ID);
         var user = UserMapper.INSTANCE.userDTOToUser(userDTO);
 
         List<AnswerDTO> answers = new ArrayList<AnswerDTO>(){{
@@ -176,7 +209,7 @@ public class UserServiceImplTest {
             }}));
         }};
 
-        Assert.assertTrue(userService.setUserAnswersToQuestions(new AnswerDTOList(answers)));
+        Assert.assertTrue(userService.setUserAnswersToQuestions(answers));
 
         var firstAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(genericQuestions.get(0)), user));
         var secondAnswer = answerRepository.findById(new AnswerId(QuestionMapper.INSTANCE.questionDTOToQuestion(genericQuestions.get(1)), user));
@@ -185,5 +218,77 @@ public class UserServiceImplTest {
         Assert.assertTrue(firstAnswer.isPresent());
         Assert.assertTrue(secondAnswer.isPresent());
         Assert.assertTrue(thirdAnswer.isPresent());
+
+        Assert.assertTrue(firstAnswer.get() instanceof FreeAnswer);
+        Assert.assertTrue(secondAnswer.get() instanceof FreeAnswer);
+        Assert.assertTrue(thirdAnswer.get() instanceof ChoiceAnswer);
+    }
+
+    @Test(expected = ErraticAnswerInputException.class)
+    public void testSetAnswerCrashesWhenNonExistentId() throws PossibleAnswersExceededException, NotAssociatedToInquiryException,
+            ErraticAnswerInputException {
+        var userDTO = userService.getByPersonalId(NON_ADMIN_USER_ID);
+        var nonExistentQuestion = new QuestionDTO(7L, null, null);
+
+        List<AnswerDTO> answers = new ArrayList<AnswerDTO>() {{
+            add(new FreeAnswerDTO(new AnswerIdDTO(nonExistentQuestion, userDTO), null, "Atm XD"));
+        }};
+
+        userService.setUserAnswersToQuestions(answers);
+    }
+
+    @Test(expected = ErraticAnswerInputException.class)
+    public void testSetAnswerCrashesWhenIllegalAnswerProvided() throws PossibleAnswersExceededException, NotAssociatedToInquiryException,
+            ErraticAnswerInputException {
+        var userDTO = userService.getByPersonalId(NON_ADMIN_USER_ID);
+        var choiceQuestion = questionService.getById(3);
+
+        List<AnswerDTO> answers = new ArrayList<AnswerDTO>() {{
+            add(new FreeAnswerDTO(new AnswerIdDTO(choiceQuestion, userDTO), null, "Atm XD"));
+        }};
+
+        userService.setUserAnswersToQuestions(answers);
+    }
+
+    @Test(expected = NotAssociatedToInquiryException.class)
+    public void testSetAnswerCrashesWhenUserNotAuthorized() throws PossibleAnswersExceededException, NotAssociatedToInquiryException,
+            ErraticAnswerInputException {
+        var userDTO = userService.getByPersonalId(NON_ADMIN_USER_ID);
+        var choiceQuestion = questionService.getById(3);
+
+        List<AnswerDTO> answers = new ArrayList<AnswerDTO>() {{
+            add(new ChoiceAnswerDTO(new AnswerIdDTO(choiceQuestion, userDTO), "Atm XD", new ArrayList<AnswerChoiceDTO>(){{
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(1L).get()));
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(2L).get()));
+            }}));
+        }};
+
+        userService.setUserAnswersToQuestions(answers);
+    }
+
+    @Test(expected = PossibleAnswersExceededException.class)
+    public void testSetAnswerCrashesWhenPossibleAnswersExceeded() throws PossibleAnswersExceededException, NotAssociatedToInquiryException,
+            ErraticAnswerInputException {
+        var user = userRepository.findByPersonalId(NON_ADMIN_USER_ID).get();
+        user.setInquiries(new HashSet<Inquiry>() {{
+            add(new Inquiry(1L, null, null, null));
+            add(new Inquiry(2L, null, null,null));
+        }});
+
+        userRepository.save(user);
+
+        var userDTO = userService.getByPersonalId(NON_ADMIN_USER_ID);
+        var choiceQuestion = questionService.getById(3);
+
+        List<AnswerDTO> answers = new ArrayList<AnswerDTO>() {{
+            add(new ChoiceAnswerDTO(new AnswerIdDTO(choiceQuestion, userDTO), "Atm XD", new ArrayList<AnswerChoiceDTO>(){{
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(1L).get()));
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(2L).get()));
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(3L).get()));
+                add(AnswerChoiceMapper.INSTANCE.answerChoiceToAnswerChoiceDTO(answerChoiceRepository.findById(4L).get()));
+            }}));
+        }};
+
+        userService.setUserAnswersToQuestions(answers);
     }
 }

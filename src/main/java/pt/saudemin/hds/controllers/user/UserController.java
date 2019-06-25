@@ -31,7 +31,7 @@ public class UserController extends BaseUserController {
     @PostMapping(value = "answers")
     public ResponseEntity<Object> sendUserAnswers(@RequestBody @Valid AnswerDTOList answers) {
         try {
-            return new ResponseEntity<>(userService.setUserAnswersToQuestions(answers), HttpStatus.OK);
+            return new ResponseEntity<>(userService.setUserAnswersToQuestions(answers.getAnswers()), HttpStatus.OK);
         } catch (AbstractSetUserAnswersException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }

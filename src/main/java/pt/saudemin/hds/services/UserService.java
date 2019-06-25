@@ -3,12 +3,13 @@ package pt.saudemin.hds.services;
 import pt.saudemin.hds.dtos.ChangePasswordDTO;
 import pt.saudemin.hds.dtos.UpdateUserDTO;
 import pt.saudemin.hds.dtos.entities.InquiryDTO;
+import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTO;
 import pt.saudemin.hds.dtos.entities.abstracts.AnswerDTOList;
 import pt.saudemin.hds.dtos.login.LoginDTO;
 import pt.saudemin.hds.dtos.login.LoginInfoDTO;
 import pt.saudemin.hds.dtos.entities.UserDTO;
 import pt.saudemin.hds.exceptions.AttachingInquiriesToAdminException;
-import pt.saudemin.hds.exceptions.ErraticInputException;
+import pt.saudemin.hds.exceptions.ErraticAnswerInputException;
 import pt.saudemin.hds.exceptions.NotAssociatedToInquiryException;
 import pt.saudemin.hds.exceptions.PossibleAnswersExceededException;
 
@@ -25,7 +26,7 @@ public interface UserService {
     LoginInfoDTO authenticateUser(LoginDTO loginDTO);
     Boolean isIdDuplicate(int id);
     Boolean changeUserPassword(ChangePasswordDTO changePasswordDTO);
-    Boolean setUserAnswersToQuestions(AnswerDTOList answerDTOList) throws PossibleAnswersExceededException,
-            NotAssociatedToInquiryException, ErraticInputException;
+    Boolean setUserAnswersToQuestions(List<AnswerDTO> answers) throws PossibleAnswersExceededException,
+            NotAssociatedToInquiryException, ErraticAnswerInputException;
     Boolean sendEmailWithUserDetails(long id);
 }
