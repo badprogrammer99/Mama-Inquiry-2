@@ -40,7 +40,7 @@ public class SeedDatabase implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        boolean RUN_SEED = false;
+        boolean RUN_SEED = true;
 
         if (RUN_SEED) {
             var encodedPassword = bCryptPasswordEncoder.encode("123456");
